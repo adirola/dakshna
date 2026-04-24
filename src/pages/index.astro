@@ -2,6 +2,23 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import VendorCard from '../components/VendorCard.astro';
 import Pagination from '../components/Pagination.astro';
+import JsonLd from '../components/JsonLd.astro';
+
+const websiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'Dakshna',
+  url: 'https://dakshna.com',
+  description: 'Discover trusted Indian wedding vendors — venues, photographers, caterers, and more.',
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: {
+      '@type': 'EntryPoint',
+      urlTemplate: 'https://dakshna.com/search?q={search_term_string}',
+    },
+    'query-input': 'required name=search_term_string',
+  },
+};
 
 const mockVendors = [
   {
@@ -51,7 +68,8 @@ const mockVendors = [
 ];
 ---
 
-<BaseLayout title="Dakshna — Indian Wedding Vendor Directory">
+<BaseLayout title="Indian Wedding Vendor Directory" description="Discover trusted venues, photographers, caterers, and more for your Indian wedding. Browse hundreds of curated listings across India.">
+  <JsonLd slot="head" schema={websiteSchema} />
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
     <h1 class="font-display text-4xl font-bold text-neutral-900 mb-2">
       Find Your Perfect Wedding Vendors

@@ -5,6 +5,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import VendorCard from '../../components/VendorCard.astro';
 import { CATEGORY_LABELS, PRICING_LABELS } from '../../lib/vendors';
+import JsonLd from '../../components/JsonLd.astro';
 
 export async function getStaticPaths() {
   const vendors = await getCollection('vendors');
@@ -36,9 +37,24 @@ const breadcrumbs = [
   },
   { label: vendor.name },
 ];
+
+const localBusinessSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'LocalBusiness',
+  name: vendor.name,
+  description: vendor.description,
+  ...(vendor.url ? { url: vendor.url } : {}),
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: vendor.city,
+    addressCountry: 'IN',
+  },
+  priceRange: PRICING_LABELS[vendor.pricingRange],
+};
 ---
 
-<BaseLayout title={`${vendor.name} — Dakshna`} description={vendor.description}>
+<BaseLayout title={`${vendor.name} — ${vendor.city} ${CATEGORY_LABELS[vendor.category] ?? vendor.category} — Dakshna`} description={vendor.description}>
+  <JsonLd slot="head" schema={localBusinessSchema} />
   <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
     <Breadcrumbs items={breadcrumbs} />
