@@ -1,5 +1,6 @@
 ---
 import type { Vendor } from '../content.config';
+import { CATEGORY_LABELS, PRICING_LABELS } from '../lib/vendors';
 
 interface Props {
   vendor: Vendor;
@@ -7,24 +8,6 @@ interface Props {
 }
 
 const { vendor, variant = 'default' } = Astro.props;
-
-const categoryLabels: Record<Vendor['category'], string> = {
-  venue: 'Venue',
-  photographer: 'Photographer',
-  makeup: 'Makeup',
-  caterer: 'Caterer',
-  decorator: 'Decorator',
-  dj: 'DJ',
-  pandit: 'Pandit',
-  planner: 'Planner',
-};
-
-const pricingLabels: Record<Vendor['pricingRange'], string> = {
-  budget: 'Budget',
-  mid: 'Mid-range',
-  premium: 'Premium',
-  luxury: 'Luxury',
-};
 
 const pricingColors: Record<Vendor['pricingRange'], string> = {
   budget: 'bg-neutral-100 text-neutral-600',
@@ -58,7 +41,7 @@ const pricingColors: Record<Vendor['pricingRange'], string> = {
     <!-- Category badge -->
     <div class="mb-2">
       <span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-primary-50 text-primary-600">
-        {categoryLabels[vendor.category]}
+        {CATEGORY_LABELS[vendor.category]}
       </span>
     </div>
 
@@ -91,7 +74,7 @@ const pricingColors: Record<Vendor['pricingRange'], string> = {
     <!-- Pricing badge -->
     <div class="flex items-center justify-between mt-auto pt-1">
       <span class:list={["inline-block px-2 py-0.5 rounded-full text-xs font-medium", pricingColors[vendor.pricingRange]]}>
-        {pricingLabels[vendor.pricingRange]}
+        {PRICING_LABELS[vendor.pricingRange]}
       </span>
     </div>
   </div>
