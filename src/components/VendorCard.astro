@@ -1,14 +1,5 @@
 ---
-interface Vendor {
-  slug: string;
-  name: string;
-  category: 'venue' | 'photographer' | 'makeup' | 'caterer' | 'decorator' | 'dj' | 'pandit' | 'planner';
-  city: string;
-  description: string;
-  pricing_range: 'budget' | 'mid' | 'premium' | 'luxury';
-  featured?: boolean;
-  verified?: boolean;
-}
+import type { Vendor } from '../content.config';
 
 interface Props {
   vendor: Vendor;
@@ -28,18 +19,18 @@ const categoryLabels: Record<Vendor['category'], string> = {
   planner: 'Planner',
 };
 
-const pricingLabels: Record<Vendor['pricing_range'], string> = {
+const pricingLabels: Record<Vendor['pricingRange'], string> = {
   budget: 'Budget',
   mid: 'Mid-range',
   premium: 'Premium',
   luxury: 'Luxury',
 };
 
-const pricingColors: Record<Vendor['pricing_range'], string> = {
-  budget: 'bg-green-50 text-green-700',
-  mid: 'bg-blue-50 text-blue-700',
-  premium: 'bg-purple-50 text-purple-700',
-  luxury: 'bg-amber-50 text-amber-700',
+const pricingColors: Record<Vendor['pricingRange'], string> = {
+  budget: 'bg-neutral-100 text-neutral-600',
+  mid: 'bg-accent-50 text-accent-600',
+  premium: 'bg-primary-50 text-primary-600',
+  luxury: 'bg-primary-100 text-primary-700',
 };
 ---
 
@@ -99,8 +90,8 @@ const pricingColors: Record<Vendor['pricing_range'], string> = {
 
     <!-- Pricing badge -->
     <div class="flex items-center justify-between mt-auto pt-1">
-      <span class:list={["inline-block px-2 py-0.5 rounded-full text-xs font-medium", pricingColors[vendor.pricing_range]]}>
-        {pricingLabels[vendor.pricing_range]}
+      <span class:list={["inline-block px-2 py-0.5 rounded-full text-xs font-medium", pricingColors[vendor.pricingRange]]}>
+        {pricingLabels[vendor.pricingRange]}
       </span>
     </div>
   </div>

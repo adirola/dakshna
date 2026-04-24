@@ -49,7 +49,9 @@ const cities = [
         <select
           id="city-select"
           name="city"
-          class="text-sm border border-neutral-200 rounded-md px-3 py-1.5 bg-white text-neutral-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+          disabled
+          title="City filter coming soon"
+          class="text-sm border border-neutral-200 rounded-md px-3 py-1.5 bg-white text-neutral-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-neutral-50"
         >
           <option value="">All cities</option>
           {cities.map(city => (
