@@ -1,18 +1,20 @@
 import type { Vendor } from '../content.config';
 import type { CollectionEntry } from 'astro:content';
 
-export const CATEGORY_LABELS: Record<Vendor['category'], string> = {
-  venue: 'Venues',
-  photographer: 'Photographers',
+export const CATEGORY_LABELS: Record<string, string> = {
+  venue: 'Wedding Venues',
+  photographer: 'Photographers & Videographers',
   makeup: 'Makeup Artists',
   caterer: 'Caterers',
-  decorator: 'Decorators',
-  dj: 'DJs',
-  pandit: 'Pandits',
-  planner: 'Planners',
+  decorator: 'Decorators & Florists',
+  dj: 'DJs & Live Music',
+  pandit: 'Pandits & Priests',
+  planner: 'Wedding Planners',
 };
 
-export const PRICING_LABELS: Record<Vendor['pricingRange'], string> = {
+export const PRICING_ORDER = ['budget', 'mid', 'premium', 'luxury'];
+
+export const PRICING_LABELS: Record<string, string> = {
   budget: 'Budget',
   mid: 'Mid-Range',
   premium: 'Premium',

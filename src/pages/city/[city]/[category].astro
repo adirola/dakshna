@@ -4,26 +4,7 @@ import type { Vendor } from '../../../content.config';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import VendorCard from '../../../components/VendorCard.astro';
 import Breadcrumbs from '../../../components/Breadcrumbs.astro';
-import { sortVendorsFeaturedFirst } from '../../../lib/vendors';
-
-const CATEGORY_LABELS: Record<string, string> = {
-  venue: 'Wedding Venues',
-  photographer: 'Photographers & Videographers',
-  makeup: 'Makeup Artists',
-  caterer: 'Caterers',
-  decorator: 'Decorators & Florists',
-  dj: 'DJs & Live Music',
-  pandit: 'Pandits & Priests',
-  planner: 'Wedding Planners',
-};
-
-const PRICING_ORDER = ['budget', 'mid', 'premium', 'luxury'];
-const PRICING_LABELS: Record<string, string> = {
-  budget: 'Budget',
-  mid: 'Mid-Range',
-  premium: 'Premium',
-  luxury: 'Luxury',
-};
+import { sortVendorsFeaturedFirst, CATEGORY_LABELS, PRICING_ORDER, PRICING_LABELS } from '../../../lib/vendors';
 
 export async function getStaticPaths() {
   const all = await getCollection('vendors');

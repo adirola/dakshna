@@ -5,7 +5,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import VendorCard from '../../components/VendorCard.astro';
 import { CATEGORIES } from '../../data/categories';
-import { sortVendorsFeaturedFirst } from '../../lib/vendors';
+import { sortVendorsFeaturedFirst, PRICING_ORDER, PRICING_LABELS } from '../../lib/vendors';
 
 export async function getStaticPaths() {
   const categoryKeys = Object.keys(CATEGORIES) as Array<keyof typeof CATEGORIES>;
@@ -37,17 +37,9 @@ const meta = CATEGORIES[category] ?? {
 
 const cities = [...new Set(vendors.map((v) => v.data.city))].sort();
 
-const PRICING_ORDER = ['budget', 'mid', 'premium', 'luxury'];
 const pricingRanges = [...new Set(vendors.map((v) => v.data.pricingRange))].sort(
   (a, b) => PRICING_ORDER.indexOf(a) - PRICING_ORDER.indexOf(b)
 );
-
-const PRICING_LABELS: Record<string, string> = {
-  budget: 'Budget',
-  mid: 'Mid-Range',
-  premium: 'Premium',
-  luxury: 'Luxury',
-};
 
 const breadcrumbs = [
   { label: 'Home', href: '/' },

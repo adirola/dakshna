@@ -2,21 +2,10 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import FeaturedCarousel from '../components/FeaturedCarousel.astro';
-import { getFeaturedVendors } from '../lib/vendors';
+import { getFeaturedVendors, CATEGORY_LABELS } from '../lib/vendors';
 
 const allVendors = await getCollection('vendors');
 const featuredVendors = getFeaturedVendors(allVendors, 8).map(v => v.data);
-
-const CATEGORY_LABELS: Record<string, string> = {
-  venue: 'Wedding Venues',
-  photographer: 'Photographers',
-  makeup: 'Makeup Artists',
-  caterer: 'Caterers',
-  decorator: 'Decorators',
-  dj: 'DJs & Live Music',
-  pandit: 'Pandits & Priests',
-  planner: 'Wedding Planners',
-};
 
 const categories = [
   'venue', 'photographer', 'makeup', 'caterer',
