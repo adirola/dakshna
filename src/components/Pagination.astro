@@ -46,21 +46,27 @@ const hasNext = currentPage < totalPages;
 {totalPages > 1 && (
   <nav aria-label="Pagination" class="flex items-center justify-center gap-1 py-8">
     <!-- Previous -->
-    <a
-      href={hasPrev ? pageUrl(currentPage - 1) : undefined}
-      aria-label="Previous page"
-      aria-disabled={!hasPrev}
-      class:list={[
-        "inline-flex items-center justify-center w-9 h-9 rounded-md text-sm transition-colors",
-        hasPrev
-          ? "text-neutral-600 hover:bg-primary-50 hover:text-primary-600 border border-neutral-200"
-          : "text-neutral-300 border border-neutral-100 pointer-events-none"
-      ]}
-    >
-      <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-      </svg>
-    </a>
+    {hasPrev ? (
+      <a
+        href={pageUrl(currentPage - 1)}
+        aria-label="Previous page"
+        class="inline-flex items-center justify-center w-9 h-9 rounded-md text-sm transition-colors text-neutral-600 hover:bg-primary-50 hover:text-primary-600 border border-neutral-200"
+      >
+        <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+      </a>
+    ) : (
+      <span
+        aria-label="Previous page"
+        aria-disabled="true"
+        class="inline-flex items-center justify-center w-9 h-9 rounded-md text-sm text-neutral-300 border border-neutral-100"
+      >
+        <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+      </span>
+    )}
 
     <!-- Page numbers -->
     {pages.map(item =>
@@ -86,20 +92,26 @@ const hasNext = currentPage < totalPages;
     )}
 
     <!-- Next -->
-    <a
-      href={hasNext ? pageUrl(currentPage + 1) : undefined}
-      aria-label="Next page"
-      aria-disabled={!hasNext}
-      class:list={[
-        "inline-flex items-center justify-center w-9 h-9 rounded-md text-sm transition-colors",
-        hasNext
-          ? "text-neutral-600 hover:bg-primary-50 hover:text-primary-600 border border-neutral-200"
-          : "text-neutral-300 border border-neutral-100 pointer-events-none"
-      ]}
-    >
-      <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-      </svg>
-    </a>
+    {hasNext ? (
+      <a
+        href={pageUrl(currentPage + 1)}
+        aria-label="Next page"
+        class="inline-flex items-center justify-center w-9 h-9 rounded-md text-sm transition-colors text-neutral-600 hover:bg-primary-50 hover:text-primary-600 border border-neutral-200"
+      >
+        <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+      </a>
+    ) : (
+      <span
+        aria-label="Next page"
+        aria-disabled="true"
+        class="inline-flex items-center justify-center w-9 h-9 rounded-md text-sm text-neutral-300 border border-neutral-100"
+      >
+        <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+      </span>
+    )}
   </nav>
 )}
