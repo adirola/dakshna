@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "dakshna": {
+      "url": "https://gitmcp.io/adirola/dakshna",
+      "description": "GitMCP server for the dakshna wedding vendor directory codebase. Provides AI agent access to source files, content schema, component docs, and vendor listings.",
+      "transport": "http"
+    }
+  }
+}
