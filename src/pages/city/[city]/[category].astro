@@ -1,0 +1,191 @@
+---
+import { getCollection } from 'astro:content';
+import type { Vendor } from '../../../content.config';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import VendorCard from '../../../components/VendorCard.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import { sortVendorsFeaturedFirst, CATEGORY_LABELS, PRICING_ORDER, PRICING_LABELS } from '../../../lib/vendors';
+
+export async function getStaticPaths() {
+  const all = await getCollection('vendors');
+
+  // Only generate pages for city×category combos that have listings.
+  const pairs = new Map<string, { city: string; category: string }>();
+  for (const v of all) {
+    const citySlug = v.data.city.toLowerCase();
+    const key = `${citySlug}__${v.data.category}`;
+    if (!pairs.has(key)) {
+      pairs.set(key, { city: citySlug, category: v.data.category });
+    }
+  }
+
+  return [...pairs.values()].map(({ city, category }) => {
+    const filtered = all.filter(
+      v => v.data.city.toLowerCase() === city && v.data.category === category,
+    );
+    const sorted = sortVendorsFeaturedFirst(filtered);
+    return {
+      params: { city, category },
+      props: { vendors: sorted.map(v => v.data) },
+    };
+  });
+}
+
+interface Props {
+  vendors: Vendor[];
+}
+
+const { city, category } = Astro.params;
+const { vendors } = Astro.props;
+
+const cityLabel = city.charAt(0).toUpperCase() + city.slice(1);
+const categoryLabel = CATEGORY_LABELS[category] ?? category.charAt(0).toUpperCase() + category.slice(1);
+
+const title = `${categoryLabel} in ${cityLabel} — Dakshna`;
+const description = `Find the best ${category} vendors in ${city}. Browse verified listings on Dakshna.`;
+
+const pricingRanges = [...new Set(vendors.map(v => v.pricingRange))].sort(
+  (a, b) => PRICING_ORDER.indexOf(a) - PRICING_ORDER.indexOf(b),
+);
+
+const breadcrumbs = [
+  { label: 'Home', href: '/' },
+  { label: cityLabel, href: `/city/${city}` },
+  { label: categoryLabel },
+];
+
+const PAGE_SIZE = 12;
+---
+
+<BaseLayout {title} {description} activeCity={city} activeCategory={category}>
+  <div class="container mx-auto px-4 py-8 max-w-7xl">
+
+    <Breadcrumbs items={breadcrumbs} />
+
+    <header class="mt-6 mb-8">
+      <h1 class="text-3xl font-bold text-gray-900">{categoryLabel} in {cityLabel}</h1>
+      <p class="mt-2 text-sm text-neutral-500">
+        {vendors.length} listing{vendors.length !== 1 ? 's' : ''} found
+      </p>
+    </header>
+
+    {vendors.length === 0 ? (
+      <div class="rounded-xl border border-dashed border-gray-300 bg-gray-50 py-20 text-center">
+        <p class="text-lg font-medium text-gray-500">No listings yet for this combination.</p>
+      </div>
+    ) : (
+      <div class="lg:flex lg:gap-8">
+
+        {pricingRanges.length > 1 && (
+          <aside class="mb-6 lg:mb-0 lg:w-56 lg:shrink-0">
+            <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm sticky top-6">
+              <h2 class="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-4">Filter</h2>
+              <div>
+                <label for="filter-pricing" class="block text-xs font-medium text-gray-500 mb-1">Pricing</label>
+                <select
+                  id="filter-pricing"
+                  class="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700 focus:border-rose-400 focus:outline-none focus:ring-1 focus:ring-rose-400"
+                >
+                  <option value="">All price ranges</option>
+                  {pricingRanges.map(range => (
+                    <option value={range}>{PRICING_LABELS[range] ?? range}</option>
+                  ))}
+                </select>
+              </div>
+              <button
+                id="filter-reset"
+                class="mt-4 w-full rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-gray-500 hover:bg-gray-50 transition-colors"
+              >
+                Reset filters
+              </button>
+            </div>
+          </aside>
+        )}
+
+        <div class="flex-1 min-w-0">
+          <p id="result-count" class="text-sm text-gray-500 mb-4">
+            Showing <span id="visible-count">{vendors.length}</span> of {vendors.length} listings
+          </p>
+
+          <div id="vendor-grid" class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {vendors.map(vendor => (
+              <div class="vendor-card-wrapper" data-pricing={vendor.pricingRange}>
+                <VendorCard vendor={vendor} />
+              </div>
+            ))}
+          </div>
+
+          <div id="no-results" class="hidden py-16 text-center">
+            <p class="text-gray-500">No vendors match the selected price range.</p>
+            <button id="no-results-reset" class="mt-3 text-sm text-rose-600 underline hover:text-rose-700">
+              Clear filters
+            </button>
+          </div>
+
+          {vendors.length > PAGE_SIZE && (
+            <nav id="pagination" class="mt-10 flex items-center justify-center gap-2" aria-label="Pagination">
+              <button id="page-prev" class="rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors" disabled>← Previous</button>
+              <span id="page-indicator" class="text-sm text-gray-600 px-2">Page <span id="current-page">1</span> of <span id="total-pages">1</span></span>
+              <button id="page-next" class="rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">Next →</button>
+            </nav>
+          )}
+        </div>
+      </div>
+    )}
+  </div>
+</BaseLayout>
+
+<script define:vars={{ PAGE_SIZE }}>
+  (() => {
+    const wrappers = Array.from(document.querySelectorAll('.vendor-card-wrapper'));
+    if (wrappers.length === 0) return;
+
+    const pricingSelect = document.getElementById('filter-pricing');
+    const resetBtn = document.getElementById('filter-reset');
+    const noResultsResetBtn = document.getElementById('no-results-reset');
+    const visibleCountEl = document.getElementById('visible-count');
+    const noResults = document.getElementById('no-results');
+    const pagination = document.getElementById('pagination');
+    const prevBtn = document.getElementById('page-prev');
+    const nextBtn = document.getElementById('page-next');
+    const currentPageEl = document.getElementById('current-page');
+    const totalPagesEl = document.getElementById('total-pages');
+
+    let currentPage = 1;
+
+    function getFiltered() {
+      const pricing = pricingSelect?.value ?? '';
+      return wrappers.filter(el => !pricing || el.dataset.pricing === pricing);
+    }
+
+    function render() {
+      const filtered = getFiltered();
+      const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+      currentPage = Math.min(currentPage, totalPages);
+      const start = (currentPage - 1) * PAGE_SIZE;
+      const visible = new Set(filtered.slice(start, start + PAGE_SIZE));
+      wrappers.forEach(el => { el.style.display = visible.has(el) ? '' : 'none'; });
+      if (visibleCountEl) visibleCountEl.textContent = String(filtered.length);
+      if (noResults) noResults.classList.toggle('hidden', filtered.length > 0);
+      if (pagination) pagination.classList.toggle('hidden', totalPages <= 1);
+      if (currentPageEl) currentPageEl.textContent = String(currentPage);
+      if (totalPagesEl) totalPagesEl.textContent = String(totalPages);
+      if (prevBtn) prevBtn.disabled = currentPage <= 1;
+      if (nextBtn) nextBtn.disabled = currentPage >= totalPages;
+    }
+
+    function reset() {
+      if (pricingSelect) pricingSelect.value = '';
+      currentPage = 1;
+      render();
+    }
+
+    pricingSelect?.addEventListener('change', () => { currentPage = 1; render(); });
+    resetBtn?.addEventListener('click', reset);
+    noResultsResetBtn?.addEventListener('click', reset);
+    prevBtn?.addEventListener('click', () => { currentPage -= 1; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
+    nextBtn?.addEventListener('click', () => { currentPage += 1; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+    render();
+  })();
+</script>
