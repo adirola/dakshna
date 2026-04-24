@@ -1,0 +1,19 @@
+---
+interface Props {
+  city: string;
+  displayName: string;
+  count: number;
+}
+
+const { city, displayName, count } = Astro.props;
+---
+
+<a
+  href={`/vendors?city=${city}`}
+  class="relative inline-flex items-center gap-3 px-5 py-3 bg-white border border-neutral-200 rounded-xl shadow-card hover:border-primary-300 hover:shadow-card-hover hover:bg-primary-50 transition-all duration-200 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
+>
+  <span class="font-medium text-neutral-800 group-hover:text-primary-700">{displayName}</span>
+  <span class="text-xs text-neutral-400 bg-neutral-100 group-hover:bg-primary-100 group-hover:text-primary-600 rounded-full px-2 py-0.5 transition-colors">
+    {count}
+  </span>
+</a>
