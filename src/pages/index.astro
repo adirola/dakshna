@@ -40,7 +40,7 @@ const mockVendors = [
     pricingRange: 'mid' as const,
     featured: true,
   },
-];
+].map((data, i) => ({ id: `mock-${i}`, collection: 'vendors' as const, data }));
 ---
 
 <BaseLayout title="Dakshna — Indian Wedding Vendor Directory">

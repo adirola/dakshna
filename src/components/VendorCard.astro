@@ -1,12 +1,14 @@
 ---
+import type { CollectionEntry } from 'astro:content';
 import type { Vendor } from '../content.config';
 
 interface Props {
-  vendor: Vendor;
+  vendor: CollectionEntry<'vendors'>;
   variant?: 'default' | 'compact';
 }
 
-const { vendor, variant = 'default' } = Astro.props;
+const { vendor: entry, variant = 'default' } = Astro.props;
+const vendor = entry.data;
 
 const categoryLabels: Record<Vendor['category'], string> = {
   venue: 'Venue',
