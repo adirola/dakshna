@@ -5,4 +5,4 @@ interface Props {
 
 const { schema } = Astro.props;
 ---
-<script type="application/ld+json" set:html={JSON.stringify(schema).replace(/<\//g, '<\\/')} />
+<script type="application/ld+json" is:inline set:html={JSON.stringify(schema).replace(/<\//g, '<\\/')} />

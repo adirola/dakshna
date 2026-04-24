@@ -15,7 +15,7 @@ interface Props {
 }
 
 const {
-  title,
+  title: rawTitle,
   description = 'Find the best Indian wedding vendors and venues for your celebration',
   ogImage = '/og-default.jpg',
   ogType = 'website',
@@ -24,6 +24,7 @@ const {
   activeCategory,
   activeCity,
 } = Astro.props;
+const title = rawTitle.replace(/\s*[—|]\s*Dakshna\s*$/i, '');
 ---
 
 <!doctype html>
