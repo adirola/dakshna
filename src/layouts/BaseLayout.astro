@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import SearchModal from '../components/SearchModal.astro';
 
 interface Props {
   title: string;
@@ -66,9 +67,10 @@ const {
     </a>
 
     <Header activeCategory={activeCategory} activeCity={activeCity} />
-    <main id="main-content" class="flex-1">
+    <main id="main-content" class="flex-1" data-pagefind-body>
       <slot />
     </main>
     <Footer />
+    <SearchModal />
   </body>
 </html>
