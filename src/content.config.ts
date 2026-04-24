@@ -25,7 +25,7 @@ const vendors = defineCollection({
       'west-india',
       'international',
     ]),
-    intents: z.array(z.string()).optional().default([]),
+    intents: z.array(z.string()).default([]),
     related: z.array(z.string()).default([]),
     tags: z.array(z.string()).default([]),
     pricing_range: z.enum(['budget', 'mid', 'premium', 'luxury']),
