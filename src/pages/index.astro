@@ -1,23 +1,71 @@
 ---
-import '../styles/global.css';
-import { Button } from '@/components/ui/button';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import VendorCard from '../components/VendorCard.astro';
+import Pagination from '../components/Pagination.astro';
+
+const mockVendors = [
+  {
+    slug: 'royal-palace-bangalore',
+    name: 'Royal Palace Banquets',
+    category: 'venue' as const,
+    city: 'Bangalore',
+    description: 'Elegant banquet hall with capacity for 500+ guests. Renowned for traditional South Indian wedding setups.',
+    pricingRange: 'premium' as const,
+    featured: true,
+    verified: true,
+    tags: [],
+    related: [],
+  },
+  {
+    slug: 'clicks-by-arjun',
+    name: 'Clicks by Arjun',
+    category: 'photographer' as const,
+    city: 'Delhi',
+    description: 'Award-winning wedding photography studio capturing candid moments and cinematic reels.',
+    pricingRange: 'mid' as const,
+    verified: true,
+    tags: [],
+    related: [],
+  },
+  {
+    slug: 'mehndi-magic-mumbai',
+    name: 'Mehndi Magic',
+    category: 'makeup' as const,
+    city: 'Mumbai',
+    description: 'Bridal makeup and mehndi services with a team of 10+ certified artists.',
+    pricingRange: 'budget' as const,
+    tags: [],
+    related: [],
+  },
+  {
+    slug: 'spice-route-caterers',
+    name: 'Spice Route Caterers',
+    category: 'caterer' as const,
+    city: 'Chennai',
+    description: 'Authentic South Indian catering specialists serving traditional thali menus.',
+    pricingRange: 'mid' as const,
+    featured: true,
+    tags: [],
+    related: [],
+  },
+];
 ---
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Dakshna — Indian Wedding Vendor Directory</title>
-  </head>
-  <body class="bg-background text-foreground font-sans">
-    <main class="container mx-auto px-4 py-16">
-      <h1 class="text-4xl font-bold text-brand-900">Dakshna</h1>
-      <p class="mt-4 text-lg text-muted-foreground">
-        The AI-native Indian wedding vendor directory.
-      </p>
-      <div class="mt-8">
-        <Button client:load>Browse Vendors</Button>
-      </div>
-    </main>
-  </body>
-</html>
+
+<BaseLayout title="Dakshna — Indian Wedding Vendor Directory">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <h1 class="font-display text-4xl font-bold text-neutral-900 mb-2">
+      Find Your Perfect Wedding Vendors
+    </h1>
+    <p class="text-lg text-neutral-600 mb-10 font-accent italic">
+      The AI-native Indian wedding directory
+    </p>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      {mockVendors.map(vendor => (
+        <VendorCard vendor={vendor} />
+      ))}
+    </div>
+
+    <Pagination currentPage={1} totalPages={5} baseUrl="/vendors" />
+  </div>
+</BaseLayout>

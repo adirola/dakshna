@@ -1,0 +1,117 @@
+---
+interface Props {
+  currentPage: number;
+  totalPages: number;
+  baseUrl: string;
+  pageParam?: string;
+}
+
+const { currentPage, totalPages, baseUrl, pageParam = 'page' } = Astro.props;
+
+function pageUrl(page: number): string {
+  if (page === 1) return baseUrl;
+  const separator = baseUrl.includes('?') ? '&' : '?';
+  return `${baseUrl}${separator}${pageParam}=${page}`;
+}
+
+type PageItem = number | 'ellipsis';
+
+function buildPageRange(current: number, total: number): PageItem[] {
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+
+  const items: PageItem[] = [1];
+
+  const windowStart = Math.max(2, current - 1);
+  const windowEnd = Math.min(total - 1, current + 1);
+
+  if (windowStart > 2) items.push('ellipsis');
+
+  for (let p = windowStart; p <= windowEnd; p++) {
+    items.push(p);
+  }
+
+  if (windowEnd < total - 1) items.push('ellipsis');
+
+  items.push(total);
+  return items;
+}
+
+const pages = buildPageRange(currentPage, totalPages);
+const hasPrev = currentPage > 1;
+const hasNext = currentPage < totalPages;
+---
+
+{totalPages > 1 && (
+  <nav aria-label="Pagination" class="flex items-center justify-center gap-1 py-8">
+    <!-- Previous -->
+    {hasPrev ? (
+      <a
+        href={pageUrl(currentPage - 1)}
+        aria-label="Previous page"
+        class="inline-flex items-center justify-center w-9 h-9 rounded-md text-sm transition-colors text-neutral-600 hover:bg-primary-50 hover:text-primary-600 border border-neutral-200"
+      >
+        <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+      </a>
+    ) : (
+      <span
+        aria-label="Previous page"
+        aria-disabled="true"
+        class="inline-flex items-center justify-center w-9 h-9 rounded-md text-sm text-neutral-300 border border-neutral-100"
+      >
+        <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+      </span>
+    )}
+
+    <!-- Page numbers -->
+    {pages.map(item =>
+      item === 'ellipsis' ? (
+        <span class="inline-flex items-center justify-center w-9 h-9 text-neutral-400 text-sm select-none" aria-hidden="true">
+          &hellip;
+        </span>
+      ) : (
+        <a
+          href={pageUrl(item)}
+          aria-label={`Page ${item}`}
+          aria-current={item === currentPage ? 'page' : undefined}
+          class:list={[
+            "inline-flex items-center justify-center w-9 h-9 rounded-md text-sm font-medium transition-colors",
+            item === currentPage
+              ? "bg-primary-600 text-white pointer-events-none"
+              : "text-neutral-600 hover:bg-primary-50 hover:text-primary-600 border border-neutral-200"
+          ]}
+        >
+          {item}
+        </a>
+      )
+    )}
+
+    <!-- Next -->
+    {hasNext ? (
+      <a
+        href={pageUrl(currentPage + 1)}
+        aria-label="Next page"
+        class="inline-flex items-center justify-center w-9 h-9 rounded-md text-sm transition-colors text-neutral-600 hover:bg-primary-50 hover:text-primary-600 border border-neutral-200"
+      >
+        <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+      </a>
+    ) : (
+      <span
+        aria-label="Next page"
+        aria-disabled="true"
+        class="inline-flex items-center justify-center w-9 h-9 rounded-md text-sm text-neutral-300 border border-neutral-100"
+      >
+        <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+      </span>
+    )}
+  </nav>
+)}

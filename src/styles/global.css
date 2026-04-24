@@ -6,12 +6,57 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  /* Brand color tokens — extend as the design system matures */
-  --color-brand-50: oklch(97% 0.02 30);
-  --color-brand-500: oklch(55% 0.18 30);
-  --color-brand-900: oklch(25% 0.12 30);
+  /* Brand colors — deep maroon */
+  --color-primary-50: #fdf2f5;
+  --color-primary-100: #fbe8ee;
+  --color-primary-200: #f6c6d7;
+  --color-primary-300: #ee96b6;
+  --color-primary-400: #e15d8c;
+  --color-primary-500: #9b1d47;
+  --color-primary-600: #7d1639;
+  --color-primary-700: #5e102b;
+  --color-primary-800: #4a0c22;
+  --color-primary-900: #3d0a1c;
 
-  --font-sans: 'Inter', system-ui, sans-serif;
+  /* Accent — saffron/gold */
+  --color-accent-50: #fffbeb;
+  --color-accent-100: #fef3c7;
+  --color-accent-200: #fde68a;
+  --color-accent-300: #fcd34d;
+  --color-accent-400: #e6a817;
+  --color-accent-500: #c68a0e;
+  --color-accent-600: #9e6c0b;
+
+  /* Warm neutrals */
+  --color-neutral-50: #faf9f7;
+  --color-neutral-100: #f4f2ef;
+  --color-neutral-200: #e8e5e0;
+  --color-neutral-300: #d4cfc8;
+  --color-neutral-400: #b0a99f;
+  --color-neutral-500: #8c8279;
+  --color-neutral-600: #6b6560;
+  --color-neutral-700: #524e4a;
+  --color-neutral-800: #3d3a36;
+  --color-neutral-900: #1f1d1a;
+
+  /* Surfaces */
+  --color-surface: #fefdf9;
+  --color-surface-alt: #f9f6f0;
+
+  /* Typography */
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-accent: 'Cormorant Garamond', Georgia, serif;
+
+  /* Shadows */
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.08), 0 4px 6px rgba(0,0,0,0.04);
+  --shadow-card-hover: 0 4px 12px rgba(155,29,71,0.12), 0 1px 4px rgba(0,0,0,0.06);
+}
+
+/* Scrollbar utility for category nav */
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
 }
 
 @theme inline {
@@ -35,13 +80,11 @@
   --color-border: var(--border);
   --color-destructive: var(--destructive);
   --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
   --color-muted: var(--muted);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
   --color-popover-foreground: var(--popover-foreground);
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);

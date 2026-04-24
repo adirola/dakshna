@@ -1,0 +1,114 @@
+---
+const categories = [
+  { label: 'Venues', href: '/venues' },
+  { label: 'Photographers', href: '/photographers' },
+  { label: 'Makeup', href: '/makeup' },
+  { label: 'Caterers', href: '/caterers' },
+  { label: 'Decorators', href: '/decorators' },
+  { label: 'DJs', href: '/djs' },
+  { label: 'Pandits', href: '/pandits' },
+  { label: 'Planners', href: '/planners' },
+];
+
+const cities = [
+  { label: 'Bangalore', href: '/city/bangalore' },
+  { label: 'Delhi', href: '/city/delhi' },
+  { label: 'Mumbai', href: '/city/mumbai' },
+  { label: 'Chennai', href: '/city/chennai' },
+  { label: 'Hyderabad', href: '/city/hyderabad' },
+  { label: 'Pune', href: '/city/pune' },
+];
+
+const year = new Date().getFullYear();
+---
+
+<footer class="bg-neutral-900 text-neutral-300 mt-16">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+
+      <!-- Brand -->
+      <div class="col-span-2 md:col-span-1">
+        <a href="/" class="inline-flex items-center gap-2 mb-3" aria-label="Dakshna home">
+          <span class="font-display text-xl font-bold text-white tracking-tight">dakshna</span>
+        </a>
+        <p class="text-sm text-neutral-400 leading-relaxed">
+          The AI-native Indian wedding vendor directory. Find the best photographers, venues, caterers, and more across India and beyond.
+        </p>
+      </div>
+
+      <!-- Categories -->
+      <div>
+        <h2 class="text-xs font-semibold uppercase tracking-wider text-neutral-500 mb-4">Categories</h2>
+        <ul class="space-y-2" role="list">
+          {categories.map(cat => (
+            <li>
+              <a
+                href={cat.href}
+                class="text-sm text-neutral-400 hover:text-white transition-colors"
+              >{cat.label}</a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <!-- Cities -->
+      <div>
+        <h2 class="text-xs font-semibold uppercase tracking-wider text-neutral-500 mb-4">Cities</h2>
+        <ul class="space-y-2" role="list">
+          {cities.map(city => (
+            <li>
+              <a
+                href={city.href}
+                class="text-sm text-neutral-400 hover:text-white transition-colors"
+              >{city.label}</a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <!-- More -->
+      <div>
+        <h2 class="text-xs font-semibold uppercase tracking-wider text-neutral-500 mb-4">More</h2>
+        <ul class="space-y-2" role="list">
+          <li>
+            <a href="/about" class="text-sm text-neutral-400 hover:text-white transition-colors">About</a>
+          </li>
+          <li>
+            <a href="/submit" class="text-sm text-neutral-400 hover:text-white transition-colors">Submit a Vendor</a>
+          </li>
+          <li>
+            <a href="/llms.txt" class="text-sm text-neutral-400 hover:text-white transition-colors">llms.txt</a>
+          </li>
+          <li>
+            <a
+              href="https://github.com/adityarola/dakshna"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-sm text-neutral-400 hover:text-white transition-colors"
+            >
+              GitHub
+              <span class="sr-only">(opens in new tab)</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Bottom bar -->
+    <div class="border-t border-neutral-800 mt-10 pt-6 flex flex-col sm:flex-row justify-between items-center gap-2 text-xs text-neutral-500">
+      <p>&copy; {year} Dakshna. All rights reserved.</p>
+      <p>
+        Vendor data licensed under{' '}
+        <a
+          href="https://creativecommons.org/licenses/by/4.0/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="underline hover:text-neutral-300"
+        >
+          CC BY 4.0
+          <span class="sr-only">(opens in new tab)</span>
+        </a>
+      </p>
+    </div>
+  </div>
+</footer>
