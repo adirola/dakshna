@@ -13,7 +13,7 @@ category: venue                        # One of: venue | photographer | makeup |
 city: bangalore                        # City name in lowercase. E.g.: bangalore, delhi, mumbai, chennai, hyderabad
 region: south-india                    # One of: south-india | north-india | east-india | west-india | international
 intents:                               # Optional. Curated intent tags. Leave as [] if unsure.
-  - find-bangalore-venues              # Pattern: find-{city}-{category} or plan-{style}-wedding
+  - find-bangalore-venue               # Pattern: find-{city}-{category} or plan-{style}-wedding
 related: []                            # Optional. Slugs of related listings already in the directory.
 tags:                                  # Optional. Descriptive keywords for filtering.
   - outdoor                            # Examples: outdoor, garden, indoor, traditional, modern, budget-friendly
