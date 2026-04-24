@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "astro build && pagefind --site dist --output-subdir _pagefind",
     "preview": "astro preview",
     "astro": "astro"
   },
@@ -32,6 +32,7 @@
     "@astrojs/check": "^0.9.8",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "pagefind": "^1.5.2",
     "typescript": "^5.9.3"
   }
 }

@@ -1,0 +1,31 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+const query = Astro.url.searchParams.get('q') ?? '';
+---
+
+<BaseLayout
+  title="Search"
+  description="Search for Indian wedding vendors, venues, photographers, and more"
+  noIndex={true}
+>
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12" data-pagefind-ignore>
+    <h1 class="font-display text-3xl font-bold text-neutral-900 mb-8">Search Vendors</h1>
+    <div id="pagefind-page-ui"></div>
+  </div>
+</BaseLayout>
+
+<link rel="stylesheet" href="/_pagefind/pagefind-ui.css" />
+
+<script is:inline define:vars={{ query }}>
+  // @ts-ignore
+  import('/_pagefind/pagefind-ui.js').then(({ PagefindUI }) => {
+    const ui = new PagefindUI({
+      element: '#pagefind-page-ui',
+      showImages: false,
+      resetStyles: false,
+    });
+    if (query) {
+      ui.triggerSearch(query);
+    }
+  });
+</script>

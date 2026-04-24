@@ -1,0 +1,74 @@
+---
+// No props — modal is a singleton, controlled by #search-trigger in Header
+---
+
+<dialog
+  id="search-dialog"
+  class="w-full max-w-2xl mx-auto mt-20 p-0 rounded-xl shadow-2xl border border-neutral-200 bg-white backdrop:bg-black/40 open:flex flex-col"
+  aria-label="Search vendors"
+>
+  <div class="p-4 flex-1 overflow-y-auto">
+    <div id="pagefind-modal-ui"></div>
+  </div>
+</dialog>
+
+<link rel="stylesheet" href="/_pagefind/pagefind-ui.css" />
+
+<script is:inline>
+  // Pagefind UI is loaded dynamically to avoid SSR issues
+  let uiInitialized = false;
+
+  async function initPagefind() {
+    if (uiInitialized) return;
+    // @ts-ignore — Pagefind is a static asset, not an npm package
+    const { PagefindUI } = await import('/_pagefind/pagefind-ui.js');
+    new PagefindUI({ element: '#pagefind-modal-ui', showImages: false });
+    uiInitialized = true;
+  }
+
+  const dialog = document.getElementById('search-dialog');
+  const trigger = document.getElementById('search-trigger');
+
+  function openModal() {
+    dialog?.showModal();
+    trigger?.setAttribute('aria-expanded', 'true');
+    initPagefind();
+  }
+
+  function closeModal() {
+    dialog?.close();
+    trigger?.setAttribute('aria-expanded', 'false');
+    trigger?.focus();
+  }
+
+  trigger?.addEventListener('click', openModal);
+
+  // Close on backdrop click
+  dialog?.addEventListener('click', (e) => {
+    const rect = dialog.getBoundingClientRect();
+    const clickedBackdrop =
+      e.clientX < rect.left ||
+      e.clientX > rect.right ||
+      e.clientY < rect.top ||
+      e.clientY > rect.bottom;
+    if (clickedBackdrop) closeModal();
+  });
+
+  // Sync aria-expanded when dialog closes via Escape key
+  dialog?.addEventListener('close', () => {
+    trigger?.setAttribute('aria-expanded', 'false');
+    trigger?.focus();
+  });
+
+  // Keyboard shortcut: Cmd+K / Ctrl+K
+  document.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      e.preventDefault();
+      if (dialog?.open) {
+        closeModal();
+      } else {
+        openModal();
+      }
+    }
+  });
+</script>
