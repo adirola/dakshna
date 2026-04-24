@@ -16,7 +16,7 @@ tags:
   - kalyana-mandapam
 pricing_range: mid
 featured: false
-verified: true
+verified: false
 submitted_at: 2026-04-01
 ---
 
