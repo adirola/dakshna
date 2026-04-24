@@ -4,6 +4,7 @@ import react from '@astrojs/react';
 import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
+  site: 'https://dakshna.com',
   output: 'static',
   site: 'https://dakshna.com',
   adapter: cloudflare(),

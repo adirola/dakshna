@@ -4,7 +4,15 @@ import type { CollectionEntry } from 'astro:content';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import VendorCard from '../../../components/VendorCard.astro';
 import Breadcrumbs from '../../../components/Breadcrumbs.astro';
-import { CATEGORY_LABELS, PRICING_ORDER, PRICING_LABELS } from '../../../lib/constants';
+import { CATEGORY_LABELS } from '../../../lib/vendors';
+
+const PRICING_ORDER = ['budget', 'mid', 'premium', 'luxury'];
+const PRICING_LABELS: Record<string, string> = {
+  budget: 'Budget',
+  mid: 'Mid-Range',
+  premium: 'Premium',
+  luxury: 'Luxury',
+};
 
 export async function getStaticPaths() {
   const all = await getCollection('vendors');
@@ -104,7 +112,7 @@ const PAGE_SIZE = 12;
         <div id="vendor-grid" class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {vendors.map(vendor => (
             <div class="vendor-card-wrapper" data-pricing={vendor.data.pricingRange}>
-              <VendorCard vendor={vendor} />
+              <VendorCard vendor={vendor.data} />
             </div>
           ))}
         </div>

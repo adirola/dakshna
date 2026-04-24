@@ -4,53 +4,10 @@ import type { CollectionEntry } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import VendorCard from '../../components/VendorCard.astro';
-import { PRICING_ORDER, PRICING_LABELS } from '../../lib/constants';
-
-const CATEGORIES: Record<string, { label: string; description: string }> = {
-  venue: {
-    label: 'Wedding Venues',
-    description:
-      'Find the perfect venue for your wedding celebration — from intimate banquet halls to grand palace-style mandapams across India.',
-  },
-  photographer: {
-    label: 'Photographers & Videographers',
-    description:
-      'Capture every moment with talented wedding photographers and videographers who understand the emotion and tradition of Indian ceremonies.',
-  },
-  makeup: {
-    label: 'Makeup Artists',
-    description:
-      'Look and feel your best on your wedding day with experienced bridal makeup artists specialising in traditional and fusion styles.',
-  },
-  caterer: {
-    label: 'Caterers',
-    description:
-      'Treat your guests to exceptional food — from traditional regional thalis to fusion menus — prepared by experienced wedding caterers.',
-  },
-  decorator: {
-    label: 'Decorators & Florists',
-    description:
-      'Transform your venue with stunning floral arrangements, mandap décor, and theme-based setups from skilled wedding decorators.',
-  },
-  dj: {
-    label: 'DJs & Live Music',
-    description:
-      'Keep the celebrations going with talented DJs and live musicians who know how to set the perfect mood for every ceremony.',
-  },
-  pandit: {
-    label: 'Pandits & Priests',
-    description:
-      'Solemnise your wedding with the right rituals — find knowledgeable pandits and priests for all Hindu ceremonies and traditions.',
-  },
-  planner: {
-    label: 'Wedding Planners',
-    description:
-      'Let an experienced wedding planner handle every detail, from vendor coordination to day-of logistics, so you can enjoy your celebration.',
-  },
-};
+import { CATEGORIES } from '../../data/categories';
 
 export async function getStaticPaths() {
-  const categoryKeys = ['venue', 'photographer', 'makeup', 'caterer', 'decorator', 'dj', 'pandit', 'planner'] as const;
+  const categoryKeys = Object.keys(CATEGORIES) as Array<keyof typeof CATEGORIES>;
   const allVendors = await getCollection('vendors');
 
   return categoryKeys.map((category) => {
@@ -79,9 +36,18 @@ const meta = CATEGORIES[category] ?? {
 
 const cities = [...new Set(vendors.map((v) => v.data.city))].sort();
 
+const PRICING_ORDER = ['budget', 'mid', 'premium', 'luxury'];
 const pricingRanges = [...new Set(vendors.map((v) => v.data.pricingRange))].sort(
   (a, b) => PRICING_ORDER.indexOf(a) - PRICING_ORDER.indexOf(b)
 );
+
+const PRICING_LABELS: Record<string, string> = {
+  budget: 'Budget',
+  mid: 'Mid-Range',
+  premium: 'Premium',
+  luxury: 'Luxury',
+};
+
 
 const breadcrumbs = [
   { label: 'Home', href: '/' },
@@ -172,7 +138,7 @@ const PAGE_SIZE = 12;
                 data-city={entry.data.city.toLowerCase()}
                 data-pricing={entry.data.pricingRange}
               >
-                <VendorCard vendor={entry} />
+                <VendorCard vendor={entry.data} />
               </div>
             ))}
           </div>

@@ -13,6 +13,8 @@ const mockVendors = [
     pricingRange: 'premium' as const,
     featured: true,
     verified: true,
+    tags: [],
+    related: [],
   },
   {
     slug: 'clicks-by-arjun',
@@ -22,6 +24,8 @@ const mockVendors = [
     description: 'Award-winning wedding photography studio capturing candid moments and cinematic reels.',
     pricingRange: 'mid' as const,
     verified: true,
+    tags: [],
+    related: [],
   },
   {
     slug: 'mehndi-magic-mumbai',
@@ -30,6 +34,8 @@ const mockVendors = [
     city: 'Mumbai',
     description: 'Bridal makeup and mehndi services with a team of 10+ certified artists.',
     pricingRange: 'budget' as const,
+    tags: [],
+    related: [],
   },
   {
     slug: 'spice-route-caterers',
@@ -39,8 +45,10 @@ const mockVendors = [
     description: 'Authentic South Indian catering specialists serving traditional thali menus.',
     pricingRange: 'mid' as const,
     featured: true,
+    tags: [],
+    related: [],
   },
-].map((data, i) => ({ id: `mock-${i}`, collection: 'vendors' as const, data }));
+];
 ---
 
 <BaseLayout title="Dakshna — Indian Wedding Vendor Directory">
