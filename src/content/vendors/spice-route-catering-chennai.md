@@ -7,7 +7,7 @@ category: caterer
 city: chennai
 region: south-india
 intents:
-  - find-chennai-caterers
+  - find-chennai-caterer
   - plan-south-indian-wedding
 related: []
 tags:

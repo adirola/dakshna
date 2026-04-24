@@ -7,7 +7,7 @@ category: makeup
 city: hyderabad
 region: south-india
 intents:
-  - find-hyderabad-makeup-artists
+  - find-hyderabad-makeup
 related: []
 tags:
   - bridal
