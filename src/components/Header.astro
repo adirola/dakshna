@@ -1,0 +1,109 @@
+---
+interface Props {
+  activeCategory?: string;
+  activeCity?: string;
+}
+
+const { activeCategory, activeCity } = Astro.props;
+
+const categories = [
+  { id: 'venue', label: 'Venues', href: '/venues' },
+  { id: 'photographer', label: 'Photographers', href: '/photographers' },
+  { id: 'makeup', label: 'Makeup', href: '/makeup' },
+  { id: 'caterer', label: 'Caterers', href: '/caterers' },
+  { id: 'decorator', label: 'Decorators', href: '/decorators' },
+  { id: 'dj', label: 'DJs', href: '/djs' },
+  { id: 'pandit', label: 'Pandits', href: '/pandits' },
+  { id: 'planner', label: 'Planners', href: '/planners' },
+];
+
+const cities = [
+  { value: 'bangalore', label: 'Bangalore' },
+  { value: 'delhi', label: 'Delhi' },
+  { value: 'mumbai', label: 'Mumbai' },
+  { value: 'chennai', label: 'Chennai' },
+  { value: 'hyderabad', label: 'Hyderabad' },
+  { value: 'pune', label: 'Pune' },
+  { value: 'kolkata', label: 'Kolkata' },
+  { value: 'jaipur', label: 'Jaipur' },
+  { value: 'kochi', label: 'Kochi' },
+  { value: 'ahmedabad', label: 'Ahmedabad' },
+  { value: 'toronto', label: 'Toronto' },
+  { value: 'london', label: 'London' },
+  { value: 'dubai', label: 'Dubai' },
+];
+---
+
+<header class="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-neutral-200 shadow-sm">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    <!-- Top row: Logo | City + Search -->
+    <div class="flex items-center justify-between h-16 gap-4">
+      <a href="/" class="flex-shrink-0 flex items-center gap-2" aria-label="Dakshna home">
+        <span class="font-display text-xl font-bold text-primary-600 tracking-tight">dakshna</span>
+        <span class="text-accent-500 text-xs font-accent italic hidden sm:inline">wedding directory</span>
+      </a>
+
+      <div class="flex items-center gap-2">
+        <label for="city-select" class="sr-only">Select city</label>
+        <select
+          id="city-select"
+          name="city"
+          class="text-sm border border-neutral-200 rounded-md px-3 py-1.5 bg-white text-neutral-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+        >
+          <option value="">All cities</option>
+          {cities.map(city => (
+            <option value={city.value} selected={activeCity === city.value}>{city.label}</option>
+          ))}
+        </select>
+
+        <button
+          type="button"
+          id="search-trigger"
+          class="inline-flex items-center gap-2 px-3 py-1.5 text-sm text-neutral-500 bg-neutral-100 hover:bg-neutral-200 rounded-md border border-neutral-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+          aria-label="Open search"
+          aria-expanded="false"
+          aria-controls="search-dialog"
+        >
+          <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <span class="hidden sm:inline">Search</span>
+          <kbd class="hidden sm:inline text-xs bg-white border border-neutral-200 rounded px-1">⌘K</kbd>
+        </button>
+      </div>
+    </div>
+
+    <!-- Category nav -->
+    <nav aria-label="Vendor categories" class="border-t border-neutral-100">
+      <ul class="flex overflow-x-auto scrollbar-none gap-1 py-2" role="list">
+        <li>
+          <a
+            href="/vendors"
+            class:list={[
+              "whitespace-nowrap text-sm font-medium px-3 py-1.5 rounded-md transition-colors",
+              !activeCategory
+                ? "text-primary-600 bg-primary-50"
+                : "text-neutral-600 hover:text-primary-600 hover:bg-primary-50"
+            ]}
+            aria-current={!activeCategory ? 'page' : undefined}
+          >All</a>
+        </li>
+        {categories.map(cat => (
+          <li>
+            <a
+              href={cat.href}
+              class:list={[
+                "whitespace-nowrap text-sm font-medium px-3 py-1.5 rounded-md transition-colors",
+                activeCategory === cat.id
+                  ? "text-primary-600 bg-primary-50"
+                  : "text-neutral-600 hover:text-primary-600 hover:bg-primary-50"
+              ]}
+              aria-current={activeCategory === cat.id ? 'page' : undefined}
+            >{cat.label}</a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  </div>
+</header>
