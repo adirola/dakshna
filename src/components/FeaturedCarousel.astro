@@ -1,0 +1,27 @@
+---
+import type { Vendor } from '../content.config';
+import VendorCard from './VendorCard.astro';
+import FeaturedBadge from './FeaturedBadge.astro';
+
+interface Props {
+  vendors: Vendor[];
+}
+
+const { vendors } = Astro.props;
+---
+
+{vendors.length > 0 && (
+  <section class="py-10">
+    <div class="container mx-auto px-4 max-w-7xl">
+      <div class="mb-6 flex items-center gap-3">
+        <FeaturedBadge />
+        <h2 class="text-2xl font-bold text-neutral-900">Featured Vendors</h2>
+      </div>
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {vendors.map((vendor) => (
+          <VendorCard vendor={vendor} />
+        ))}
+      </div>
+    </div>
+  </section>
+)}

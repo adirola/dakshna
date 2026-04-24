@@ -5,15 +5,16 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import VendorCard from '../../components/VendorCard.astro';
 import { CATEGORIES } from '../../data/categories';
+import { sortVendorsFeaturedFirst } from '../../lib/vendors';
 
 export async function getStaticPaths() {
   const categoryKeys = Object.keys(CATEGORIES) as Array<keyof typeof CATEGORIES>;
   const allVendors = await getCollection('vendors');
 
   return categoryKeys.map((category) => {
-    const vendors = allVendors
-      .filter((entry) => entry.data.category === category)
-      .sort((a, b) => (b.data.featured ? 1 : 0) - (a.data.featured ? 1 : 0));
+    const vendors = sortVendorsFeaturedFirst(
+      allVendors.filter((entry) => entry.data.category === category),
+    );
 
     return {
       params: { category },

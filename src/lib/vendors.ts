@@ -1,4 +1,5 @@
 import type { Vendor } from '../content.config';
+import type { CollectionEntry } from 'astro:content';
 
 export const CATEGORY_LABELS: Record<Vendor['category'], string> = {
   venue: 'Venues',
@@ -17,3 +18,16 @@ export const PRICING_LABELS: Record<Vendor['pricingRange'], string> = {
   premium: 'Premium',
   luxury: 'Luxury',
 };
+
+export function sortVendorsFeaturedFirst(
+  vendors: CollectionEntry<'vendors'>[],
+): CollectionEntry<'vendors'>[] {
+  return vendors.slice().sort((a, b) => (b.data.featured ? 1 : 0) - (a.data.featured ? 1 : 0));
+}
+
+export function getFeaturedVendors(
+  vendors: CollectionEntry<'vendors'>[],
+  limit: number,
+): CollectionEntry<'vendors'>[] {
+  return vendors.filter((v) => v.data.featured).slice(0, limit);
+}
