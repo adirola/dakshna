@@ -1,0 +1,23 @@
+# Dakshna
+
+> South Asian wedding vendor directory — Astro 5, Cloudflare Pages, SSG, Zod content schema.
+
+## MCP Access
+
+- [GitMCP Server](https://gitmcp.io/adirola/dakshna): Zero-config MCP endpoint. AI agents (Cursor, Claude, Copilot) can read repo files via this URL.
+
+## Repository
+
+- [GitHub](https://github.com/adirola/dakshna): Full source code (public after launch)
+- [Sitemap](https://dakshna.com/sitemap-index.xml): All vendor listing URLs
+
+## Key Paths
+
+- `src/content/vendors/`: Vendor `.md` listing files (Zod-validated)
+- `src/content.config.ts`: Content collection schema
+- `src/components/`: Astro UI components
+- `public/llms.txt`: This file
+
+## Optional
+
+- [Full llms.txt](https://dakshna.com/llms-full.txt): Extended version with all vendor listings (Task 11)
