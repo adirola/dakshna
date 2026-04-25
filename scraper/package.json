@@ -1,0 +1,25 @@
+{
+  "name": "dakshna-scraper",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Dakshna vendor scraper — Gemini grounded search + Firecrawl + MCP server",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "start": "node --experimental-strip-types src/index.ts",
+    "mcp": "node --experimental-strip-types src/mcp-server.ts",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@google/genai": "^1.0.0",
+    "@mendable/firecrawl-js": "^1.24.5",
+    "@modelcontextprotocol/sdk": "^1.11.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.9.3"
+  }
+}
