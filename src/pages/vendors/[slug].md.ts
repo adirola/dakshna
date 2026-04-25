@@ -54,8 +54,8 @@ function toMarkdown(vendor: Vendor): string {
   return fm.join('\n') + '\n\n' + body.join('\n') + '\n';
 }
 
-export const GET: APIRoute = ({ props }) => {
-  return new Response(toMarkdown(props.vendor as Vendor), {
+export const GET: APIRoute<{ vendor: Vendor }> = ({ props }) => {
+  return new Response(toMarkdown(props.vendor), {
     headers: { 'Content-Type': 'text/markdown; charset=utf-8' },
   });
 };
