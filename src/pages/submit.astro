@@ -1,0 +1,63 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PublicSubmitForm from '../components/PublicSubmitForm';
+---
+
+<BaseLayout
+  title="Submit Your Business"
+  description="List your wedding venue, photographer, caterer, or other wedding service on Dakshna — India's wedding vendor directory."
+>
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <div class="mb-10">
+      <h1 class="text-3xl font-display font-semibold text-neutral-900 mb-3">
+        List your business on Dakshna
+      </h1>
+      <p class="text-neutral-600">
+        Submit your wedding business for review. Free listings for venues, photographers, caterers,
+        makeup artists, decorators, DJs, pandits, and wedding planners across India.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+      <div class="lg:col-span-2">
+        <PublicSubmitForm client:load />
+      </div>
+
+      <aside class="space-y-6 text-sm text-neutral-600">
+        <div>
+          <h2 class="font-semibold text-neutral-900 mb-2">How it works</h2>
+          <ol class="space-y-2 list-decimal list-inside">
+            <li>Fill in your business details</li>
+            <li>We review your submission (2–3 business days)</li>
+            <li>Your listing goes live on Dakshna</li>
+          </ol>
+        </div>
+
+        <div>
+          <h2 class="font-semibold text-neutral-900 mb-2">What we accept</h2>
+          <ul class="space-y-1 list-disc list-inside">
+            <li>Wedding venues &amp; banquet halls</li>
+            <li>Photographers &amp; videographers</li>
+            <li>Makeup artists &amp; bridal stylists</li>
+            <li>Caterers &amp; food vendors</li>
+            <li>Decorators &amp; florists</li>
+            <li>DJs &amp; live music</li>
+            <li>Pandits &amp; priests</li>
+            <li>Wedding planners</li>
+          </ul>
+        </div>
+
+        <div>
+          <h2 class="font-semibold text-neutral-900 mb-2">Featured listings</h2>
+          <p>
+            Basic listings are free. For prominent placement and a Featured badge,
+            <a href="https://github.com/adirola/dakshna/issues/new" target="_blank" rel="noopener noreferrer"
+               class="text-primary-600 hover:text-primary-700 underline underline-offset-2">
+              contact us on GitHub
+            </a> after your listing goes live.
+          </p>
+        </div>
+      </aside>
+    </div>
+  </div>
+</BaseLayout>
