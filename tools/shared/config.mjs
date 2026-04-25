@@ -25,6 +25,34 @@ export const config = {
   cloudflareAccountId: process.env.CLOUDFLARE_ACCOUNT_ID ?? '',
 };
 
+export function getScraperConfig() {
+  return {
+    delayMs: parseInt(process.env.SCRAPE_DELAY_MS ?? '2000', 10),
+    maxRetries: parseInt(process.env.SCRAPE_MAX_RETRIES ?? '3', 10),
+    googlePlacesApiKey: process.env.GOOGLE_PLACES_API_KEY ?? null,
+  };
+}
+
+export function getGithubConfig() {
+  if (!process.env.GITHUB_TOKEN) console.warn('[config] GITHUB_TOKEN is not set');
+  return {
+    token: process.env.GITHUB_TOKEN ?? '',
+    owner: process.env.GITHUB_OWNER ?? 'adirola',
+    repo: process.env.GITHUB_REPO ?? 'dakshna',
+  };
+}
+
+export function getYoutubeConfig() {
+  return { apiKey: process.env.YOUTUBE_API_KEY ?? null };
+}
+
+export function getCloudflareConfig() {
+  return {
+    apiToken: process.env.CLOUDFLARE_API_TOKEN ?? null,
+    accountId: process.env.CLOUDFLARE_ACCOUNT_ID ?? null,
+  };
+}
+
 /**
  * Assert required env vars are present. Exits with error if any are missing.
  * @param {string[]} keys - keys from `config` that must be non-empty

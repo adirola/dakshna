@@ -9,7 +9,13 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "hunt": "node tools/classified-hunter/index.mjs",
+    "seo": "node tools/seo-optimizer/seo-report.mjs",
+    "import": "node tools/growth/bulk-import.mjs",
+    "duplicates": "node tools/growth/duplicate-detector.mjs",
+    "youtube": "node tools/youtube-enrichment/index.mjs",
+    "analytics": "node tools/growth/analytics-summary.mjs"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^12.6.13",
@@ -20,6 +26,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^1.9.0",
+    "octokit": "^4.0.0",
     "radix-ui": "^1.4.3",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
@@ -32,6 +39,11 @@
     "@astrojs/check": "^0.9.8",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "cheerio": "^1.0.0",
+    "commander": "^12.1.0",
+    "fast-levenshtein": "^3.0.0",
+    "gray-matter": "^4.0.3",
+    "sharp": "^0.33.5",
     "typescript": "^5.9.3"
   }
 }

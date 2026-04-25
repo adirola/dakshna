@@ -1,93 +1,71 @@
 #!/usr/bin/env node
-/**
- * bulk-import.mjs — Import classified-hunter JSON output into src/content/vendors/.
- * Validates each entry against the schema and skips invalid ones.
- *
- * Usage:
- *   node tools/growth/bulk-import.mjs \
- *     --input ./data/hunts/hunt-2026-04-25-venue-bangalore.json \
- *     --output ./src/content/vendors
- *
- *   # Dry run (validate only, don't write files)
- *   node tools/growth/bulk-import.mjs --input ./data/hunts/hunt.json --dry-run
- *
- *   # Skip duplicates that already exist
- *   node tools/growth/bulk-import.mjs --input ./data/hunts/hunt.json --skip-existing
- */
-
-import { parseArgs } from 'node:util';
-import { readFileSync, existsSync } from 'node:fs';
-import { writeVendors } from '../shared/json-writer.mjs';
-import { validateVendor, applyDefaults } from '../shared/schema.mjs';
+import { Command } from 'commander';
+import { readFile, access } from 'node:fs/promises';
 import { join } from 'node:path';
+import { validateVendor } from '../shared/schema.mjs';
+import { writeVendorMarkdown } from '../shared/markdown-writer.mjs';
 
-const { values } = parseArgs({
-  options: {
-    input:          { type: 'string' },
-    output:         { type: 'string', default: './src/content/vendors' },
-    'dry-run':      { type: 'boolean', default: false },
-    'skip-existing': { type: 'boolean', default: true },
-  },
-  strict: false,
-});
+const program = new Command();
 
-if (!values.input) {
-  console.error('Usage: node tools/growth/bulk-import.mjs --input <batch.json>');
+program
+  .requiredOption('--input <path>', 'Path to JSON array of vendor objects')
+  .option('--output <path>', 'Output directory for .md files', './src/content/vendors')
+  .option('--dry-run', 'Validate only, do not write files', false)
+  .option('--skip-invalid', 'Continue past validation errors instead of stopping', false)
+  .parse(process.argv);
+
+const opts = program.opts();
+
+let vendors;
+try {
+  vendors = JSON.parse(await readFile(opts.input, 'utf8'));
+} catch (err) {
+  console.error(`Failed to read ${opts.input}: ${err.message}`);
   process.exit(1);
 }
 
-if (!existsSync(values.input)) {
-  console.error(`File not found: ${values.input}`);
-  process.exit(1);
-}
-
-const batch = JSON.parse(readFileSync(values.input, 'utf8'));
-if (!Array.isArray(batch)) {
+if (!Array.isArray(vendors)) {
   console.error('Input must be a JSON array of vendor objects.');
   process.exit(1);
 }
 
-console.log(`\nBulk Import — ${batch.length} vendors from ${values.input}`);
+console.log(`\nBulk Import — ${vendors.length} vendors from ${opts.input}`);
 
-let valid = 0;
-let invalid = 0;
-let existing = 0;
-const toWrite = [];
+const results = { valid: 0, invalid: 0, skipped: 0 };
 
-for (const raw of batch) {
-  // Remove internal scraper fields before writing
-  const { _source, _rawCategory, ...vendor } = raw;
-  const withDefaults = applyDefaults(vendor);
-  const { valid: isValid, errors } = validateVendor(withDefaults);
+async function fileExists(p) {
+  try { await access(p); return true; } catch { return false; }
+}
 
-  if (!isValid) {
-    console.warn(`  ✗ ${raw.slug ?? '(no slug)'}: ${errors?.join('; ')}`);
-    invalid++;
+for (const vendor of vendors) {
+  const { _source, _rawCategory, ...clean } = vendor;
+  const { valid, errors } = validateVendor(clean);
+
+  if (!valid) {
+    console.error(`INVALID: ${clean.name ?? '(no name)'} — ${errors.join(', ')}`);
+    results.invalid++;
+    if (!opts.skipInvalid) {
+      console.error('Stopping. Use --skip-invalid to continue past errors.');
+      process.exit(1);
+    }
     continue;
   }
 
-  const outPath = join(values.output, `${withDefaults.slug}.json`);
-  if (values['skip-existing'] && existsSync(outPath)) {
-    console.log(`  ~ ${withDefaults.slug} (exists, skipped)`);
-    existing++;
+  const targetPath = join(opts.output, `${clean.id}.md`);
+  if (await fileExists(targetPath)) {
+    console.warn(`SKIP existing: ${clean.id}`);
+    results.skipped++;
     continue;
   }
 
-  toWrite.push(withDefaults);
-  valid++;
+  if (opts.dryRun) {
+    console.log(`[dry-run] Would write: ${clean.id}.md`);
+  } else {
+    await writeVendorMarkdown(clean, opts.output);
+    console.log(`Written: ${clean.id}.md`);
+  }
+  results.valid++;
 }
 
-console.log(`\n  Valid: ${valid}  Invalid: ${invalid}  Skipped (existing): ${existing}`);
-
-if (values['dry-run']) {
-  console.log('\nDry run — no files written.');
-  process.exit(invalid > 0 ? 1 : 0);
-}
-
-if (toWrite.length > 0) {
-  console.log(`\nWriting ${toWrite.length} vendor file(s) to ${values.output}:`);
-  writeVendors(toWrite, values.output);
-}
-
-console.log('\nDone.');
-process.exit(invalid > 0 ? 1 : 0);
+console.log(`\nSummary: ${results.valid} imported, ${results.skipped} skipped, ${results.invalid} invalid`);
+process.exit(results.invalid > 0 ? 1 : 0);

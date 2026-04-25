@@ -9,7 +9,7 @@ import { CATEGORY_LABELS, PRICING_LABELS } from '../../lib/vendors';
 export async function getStaticPaths() {
   const vendors = await getCollection('vendors');
   return vendors.map((entry) => ({
-    params: { slug: entry.data.slug },
+    params: { slug: entry.data.id },
     props: { entry },
   }));
 }
@@ -21,10 +21,10 @@ interface Props {
 const { entry } = Astro.props;
 const vendor = entry.data;
 
-// Resolve related vendors by slug; skip any that no longer exist
+// Resolve related vendors by id; skip any that no longer exist
 const relatedVendors = vendor.related.length
   ? (await getCollection('vendors'))
-      .filter((v) => vendor.related.includes(v.data.slug))
+      .filter((v) => vendor.related.includes(v.data.id))
       .map((v) => v.data)
   : [];
 
@@ -81,7 +81,7 @@ const breadcrumbs = [
           </>
         )}
         <span aria-hidden="true">·</span>
-        <span class="font-medium text-neutral-700">{PRICING_LABELS[vendor.pricingRange]}</span>
+        <span class="font-medium text-neutral-700">{PRICING_LABELS[vendor.pricing_range]}</span>
       </div>
     </header>
 

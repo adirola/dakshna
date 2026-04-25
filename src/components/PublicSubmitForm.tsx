@@ -17,10 +17,10 @@ interface FormData {
   description: string;
   category: string;
   city: string;
-  pricingRange: string;
+  pricing_range: string;
 }
 
-const empty: FormData = { name: '', url: '', description: '', category: '', city: '', pricingRange: '' };
+const empty: FormData = { name: '', url: '', description: '', category: '', city: '', pricing_range: '' };
 
 function validate(data: FormData): string[] {
   const errors: string[] = [];
@@ -31,7 +31,7 @@ function validate(data: FormData): string[] {
   else if (data.description.length > 500) errors.push('Description must be 500 characters or fewer');
   if (!data.category) errors.push('Category is required');
   if (!data.city.trim()) errors.push('City is required');
-  if (!data.pricingRange) errors.push('Pricing range is required');
+  if (!data.pricing_range) errors.push('Pricing range is required');
   return errors;
 }
 
@@ -156,7 +156,7 @@ export default function PublicSubmitForm() {
 
       <div>
         <label className="block text-sm font-medium text-neutral-700 mb-1">Pricing range *</label>
-        <select name="pricingRange" value={form.pricingRange} onChange={handleChange} disabled={state === 'submitting'}
+        <select name="pricing_range" value={form.pricing_range} onChange={handleChange} disabled={state === 'submitting'}
           className="w-full border border-neutral-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50">
           <option value="">Select…</option>
           {PRICING_RANGES.map((p) => <option key={p} value={p}>{PRICING_LABELS[p]}</option>)}

@@ -1,59 +1,51 @@
-/**
- * Vendor schema constraints for Node.js CLI tools.
- * Mirrors src/content.config.ts — keep in sync manually.
- */
-
 export const CATEGORIES = ['venue', 'photographer', 'makeup', 'caterer', 'decorator', 'dj', 'pandit', 'planner'];
-
+export const REGIONS = ['south-india', 'north-india', 'east-india', 'west-india', 'international'];
 export const PRICING_RANGES = ['budget', 'mid', 'premium', 'luxury'];
-
-// Slug: lowercase kebab-case, letters + numbers only
-const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+export const REQUIRED_FIELDS = ['id', 'name', 'url', 'description', 'category', 'city', 'region', 'pricing_range', 'submitted_at'];
+export const OPTIONAL_FIELDS = ['intents', 'related', 'tags', 'featured', 'verified'];
 
 /**
- * Validate a vendor object against the schema.
- * Returns { valid: true } or { valid: false, errors: string[] }.
+ * Validate a vendor object against the DEV-325 schema.
+ * @param {object} obj
+ * @returns {{ valid: boolean, errors: string[] }}
  */
-export function validateVendor(vendor) {
+export function validateVendor(obj) {
   const errors = [];
 
-  if (!vendor.slug || !SLUG_RE.test(vendor.slug)) {
-    errors.push(`slug "${vendor.slug}" must be kebab-case alphanumeric (e.g. "regal-gardens-bangalore")`);
-  }
-  if (!vendor.name || typeof vendor.name !== 'string' || vendor.name.length > 120) {
-    errors.push('name is required, must be a string ≤ 120 chars');
-  }
-  if (!CATEGORIES.includes(vendor.category)) {
-    errors.push(`category "${vendor.category}" must be one of: ${CATEGORIES.join(', ')}`);
-  }
-  if (!vendor.city || typeof vendor.city !== 'string') {
-    errors.push('city is required');
-  }
-  if (!vendor.description || typeof vendor.description !== 'string' || vendor.description.length > 500) {
-    errors.push('description is required, must be a string ≤ 500 chars');
-  }
-  if (!PRICING_RANGES.includes(vendor.pricingRange)) {
-    errors.push(`pricingRange "${vendor.pricingRange}" must be one of: ${PRICING_RANGES.join(', ')}`);
-  }
-  if (vendor.url !== undefined && vendor.url !== null) {
-    try { new URL(vendor.url); } catch { errors.push(`url "${vendor.url}" is not a valid URL`); }
-  }
-  if (vendor.tags !== undefined && !Array.isArray(vendor.tags)) {
-    errors.push('tags must be an array');
-  }
-  if (vendor.related !== undefined && !Array.isArray(vendor.related)) {
-    errors.push('related must be an array');
+  for (const field of REQUIRED_FIELDS) {
+    if (obj[field] === undefined || obj[field] === null || obj[field] === '') {
+      errors.push(`${field} is required`);
+    }
   }
 
-  return errors.length === 0 ? { valid: true } : { valid: false, errors };
+  if (obj.category && !CATEGORIES.includes(obj.category)) {
+    errors.push(`category "${obj.category}" must be one of: ${CATEGORIES.join(', ')}`);
+  }
+  if (obj.region && !REGIONS.includes(obj.region)) {
+    errors.push(`region "${obj.region}" must be one of: ${REGIONS.join(', ')}`);
+  }
+  if (obj.pricing_range && !PRICING_RANGES.includes(obj.pricing_range)) {
+    errors.push(`pricing_range "${obj.pricing_range}" must be one of: ${PRICING_RANGES.join(', ')}`);
+  }
+  if (obj.url && !/^https?:\/\//i.test(obj.url)) {
+    errors.push(`url "${obj.url}" must start with http:// or https://`);
+  }
+  if (obj.description && obj.description.length > 200) {
+    errors.push(`description must be ≤ 200 chars (got ${obj.description.length})`);
+  }
+
+  return { valid: errors.length === 0, errors };
 }
 
 /**
- * Convert an arbitrary string to a valid slug.
- * e.g. "Regal Gardens Bangalore!" → "regal-gardens-bangalore"
+ * Convert name + city into a kebab-case slug ID.
+ * e.g. "Regal Gardens" + "Bangalore" → "regal-gardens-bangalore"
+ * @param {string} name
+ * @param {string} city
+ * @returns {string}
  */
-export function toSlug(str) {
-  return str
+export function slugify(name, city) {
+  return `${name} ${city}`
     .toLowerCase()
     .replace(/[^a-z0-9\s-]/g, '')
     .trim()
@@ -61,14 +53,18 @@ export function toSlug(str) {
 }
 
 /**
- * Apply schema defaults to a vendor object (matches Astro collection defaults).
+ * Apply schema defaults to a partial vendor object.
+ * @param {object} partial
+ * @returns {object}
  */
-export function applyDefaults(vendor) {
+export function defaultVendor(partial) {
   return {
-    tags: [],
-    related: [],
     featured: false,
     verified: false,
-    ...vendor,
+    intents: [],
+    related: [],
+    tags: [],
+    submitted_at: new Date().toISOString().split('T')[0],
+    ...partial,
   };
 }

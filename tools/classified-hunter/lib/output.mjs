@@ -1,40 +1,57 @@
-/**
- * Output helpers for classified-hunter: write JSON array + individual vendor files.
- */
-
-import { writeFileSync, mkdirSync } from 'node:fs';
-import { writeVendors } from '../../shared/json-writer.mjs';
+import { mkdir, writeFile, access } from 'node:fs/promises';
+import { join } from 'node:path';
+import { writeVendorMarkdown } from '../../shared/markdown-writer.mjs';
 
 /**
- * Save results: JSON batch file + individual vendor files.
- * @param {object[]} vendors - normalized vendor objects
- * @param {object} opts
- * @param {string} opts.outputDir - path to src/content/vendors/
- * @param {string} opts.batchFile - path for the JSON batch output (e.g. data/hunt-2026-04-25.json)
- * @param {boolean} [opts.writeIndividual=true] - write individual vendor JSON files
+ * Deduplicate vendors by id (slug). Keeps first occurrence.
+ * @param {object[]} vendors
+ * @returns {object[]}
  */
-export function saveResults(vendors, { outputDir, batchFile, writeIndividual = true }) {
-  // Always write the batch JSON (raw output before any editing)
-  mkdirSync(batchFile.replace(/\/[^/]+$/, ''), { recursive: true });
-  writeFileSync(batchFile, JSON.stringify(vendors, null, 2) + '\n', 'utf8');
-  console.log(`\nBatch saved → ${batchFile} (${vendors.length} vendors)`);
-
-  if (writeIndividual) {
-    console.log(`\nWriting to ${outputDir}:`);
-    const { written, skipped } = writeVendors(vendors, outputDir);
-    console.log(`  ${written} written, ${skipped} skipped (validation errors)`);
-  }
+export function deduplicateVendors(vendors) {
+  const seen = new Set();
+  let dupes = 0;
+  const result = vendors.filter((v) => {
+    if (seen.has(v.id)) { dupes++; return false; }
+    seen.add(v.id);
+    return true;
+  });
+  if (dupes > 0) process.stderr.write(`  [dedup] removed ${dupes} duplicate(s)\n`);
+  return result;
 }
 
 /**
- * Print a summary table to stdout.
+ * Write vendors to a JSON file.
+ * @param {object[]} vendors
+ * @param {string} outputPath
  */
-export function printSummary(vendors, source) {
-  console.log(`\n── ${source} results (${vendors.length}) ──────────────────`);
-  for (const v of vendors.slice(0, 10)) {
-    console.log(`  ${v.slug.padEnd(40)} ${v.category.padEnd(12)} ${v.city}`);
+export async function writeJson(vendors, outputPath) {
+  const dir = outputPath.replace(/\/[^/]+$/, '');
+  await mkdir(dir, { recursive: true });
+  await writeFile(outputPath, JSON.stringify(vendors, null, 2) + '\n', 'utf8');
+}
+
+/**
+ * Write vendor objects as .md files to outputDir.
+ * Skips vendors where outputDir/{id}.md already exists.
+ * @param {object[]} vendors
+ * @param {string} outputDir
+ * @returns {Promise<{ written: number, skipped: number }>}
+ */
+export async function writeMarkdownFiles(vendors, outputDir) {
+  let written = 0;
+  let skipped = 0;
+
+  for (const vendor of vendors) {
+    const targetPath = join(outputDir, `${vendor.id}.md`);
+    try {
+      await access(targetPath);
+      console.warn(`  ~ ${vendor.id}.md already exists — skipping`);
+      skipped++;
+    } catch {
+      await writeVendorMarkdown(vendor, outputDir);
+      written++;
+    }
   }
-  if (vendors.length > 10) {
-    console.log(`  … and ${vendors.length - 10} more`);
-  }
+
+  return { written, skipped };
 }

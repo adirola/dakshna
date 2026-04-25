@@ -1,140 +1,109 @@
 #!/usr/bin/env node
-/**
- * YouTube Enrichment — find YouTube channels and videos for each vendor.
- *
- * Usage:
- *   node tools/youtube-enrichment/index.mjs \
- *     --vendors ./src/content/vendors \
- *     --output ./data/youtube.json
- *
- * Requires YOUTUBE_API_KEY in environment (or falls back to web scraping).
- *
- * Output shape:
- *   { [vendorSlug]: { channel: string|null, videos: VideoResult[], subscriberCount: number|null } }
- */
-
-import { parseArgs } from 'node:util';
-import { readFileSync, readdirSync, writeFileSync, mkdirSync } from 'node:fs';
+import { Command } from 'commander';
+import { readFile, readdir, writeFile, mkdir } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
-import { config } from '../shared/config.mjs';
+import matter from 'gray-matter';
+import { getYoutubeConfig } from '../shared/config.mjs';
 import { fetchWithRetry, delay } from '../classified-hunter/lib/anti-bot.mjs';
 
-const { values } = parseArgs({
-  options: {
-    vendors: { type: 'string', default: './src/content/vendors' },
-    output:  { type: 'string', default: './data/youtube.json' },
-    limit:   { type: 'string', default: '5' },
-  },
-  strict: false,
-});
+const program = new Command();
 
-const videoLimit = parseInt(values.limit, 10) || 5;
+program
+  .option('--vendors <path>', 'Path to src/content/vendors/', './src/content/vendors')
+  .option('--output <path>', 'Output JSON file path', './data/youtube.json')
+  .option('--dry-run', 'Log results only, do not write output file', false)
+  .parse(process.argv);
 
-/** YouTube Data API v3 search */
-async function searchYouTubeApi(query, maxResults = videoLimit) {
+const opts = program.opts();
+
+async function searchYouTubeApi(vendorName, city, apiKey) {
   const url = new URL('https://www.googleapis.com/youtube/v3/search');
   url.searchParams.set('part', 'snippet');
-  url.searchParams.set('q', query);
+  url.searchParams.set('q', `${vendorName} ${city} wedding`);
   url.searchParams.set('type', 'channel,video');
-  url.searchParams.set('maxResults', String(maxResults));
-  url.searchParams.set('regionCode', 'IN');
-  url.searchParams.set('key', config.youtubeApiKey);
+  url.searchParams.set('maxResults', '5');
+  url.searchParams.set('key', apiKey);
 
   const res = await fetch(url.toString());
   if (!res.ok) throw new Error(`YouTube API error: ${res.status}`);
-  return res.json();
-}
-
-/** Scrape YouTube search results without API (fallback) */
-async function searchYouTubeScrape(query, maxResults = videoLimit) {
-  const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
-  const res = await fetchWithRetry(url);
-  if (!res.ok) return { items: [] };
-
-  const html = await res.text();
-  const items = [];
-
-  // Extract video IDs from initial data JSON embedded in page
-  const initDataMatch = html.match(/var ytInitialData\s*=\s*(\{.+?\});\s*<\/script>/s);
-  if (!initDataMatch) return { items: [] };
-
-  try {
-    const data = JSON.parse(initDataMatch[1]);
-    const contents = data?.contents?.twoColumnSearchResultsRenderer?.primaryContents
-      ?.sectionListRenderer?.contents?.[0]?.itemSectionRenderer?.contents ?? [];
-
-    for (const item of contents) {
-      const vr = item.videoRenderer;
-      const cr = item.channelRenderer;
-
-      if (vr && items.length < maxResults) {
-        items.push({
-          kind: 'youtube#searchResult',
-          id: { kind: 'youtube#video', videoId: vr.videoId },
-          snippet: { title: vr.title?.runs?.[0]?.text ?? '', channelTitle: vr.ownerText?.runs?.[0]?.text ?? '' },
-        });
-      }
-      if (cr && items.length < maxResults) {
-        items.push({
-          kind: 'youtube#searchResult',
-          id: { kind: 'youtube#channel', channelId: cr.channelId },
-          snippet: { title: cr.title?.simpleText ?? '', customUrl: cr.customUrl ?? '' },
-        });
-      }
-    }
-  } catch { /* parsing failed — return empty */ }
-
-  return { items };
-}
-
-async function enrichVendor(vendor) {
-  const query = `${vendor.name} ${vendor.city} wedding`;
-
-  let data;
-  if (config.youtubeApiKey) {
-    data = await searchYouTubeApi(query);
-  } else {
-    data = await searchYouTubeScrape(query);
-  }
-
+  const data = await res.json();
   const items = data.items ?? [];
   const channelItem = items.find((i) => i.id?.kind === 'youtube#channel');
-  const videoItems = items.filter((i) => i.id?.kind === 'youtube#video').slice(0, videoLimit);
-
+  const videoItems = items.filter((i) => i.id?.kind === 'youtube#video');
   return {
-    channel: channelItem ? `https://www.youtube.com/channel/${channelItem.id.channelId}` : null,
-    videos: videoItems.map((v) => ({
-      url: `https://www.youtube.com/watch?v=${v.id.videoId}`,
-      title: v.snippet?.title ?? '',
-    })),
-    subscriberCount: null, // Requires a separate channels.list API call; omitted to save quota
+    channelUrl: channelItem ? `https://www.youtube.com/channel/${channelItem.id.channelId}` : null,
+    videos: videoItems.map((v) => ({ url: `https://www.youtube.com/watch?v=${v.id.videoId}`, title: v.snippet?.title ?? '' })),
+    subscriberCount: null,
   };
 }
 
-// Main
-const vendorFiles = readdirSync(values.vendors).filter((f) => f.endsWith('.json'));
-console.log(`\nYouTube Enrichment — ${vendorFiles.length} vendors`);
-if (!config.youtubeApiKey) console.log('  (No YOUTUBE_API_KEY — using web scrape fallback)');
+async function searchYouTubeFallback(vendorName, city) {
+  const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(`${vendorName} ${city} wedding`)}`;
+  try {
+    const res = await fetchWithRetry(url);
+    if (!res.ok) return { channelUrl: null, videos: [], subscriberCount: null };
+    const html = await res.text();
+    const match = html.match(/var ytInitialData\s*=\s*(\{.+?\});\s*<\/script>/s);
+    if (!match) return { channelUrl: null, videos: [], subscriberCount: null };
+    const data = JSON.parse(match[1]);
+    const contents = data?.contents?.twoColumnSearchResultsRenderer?.primaryContents
+      ?.sectionListRenderer?.contents?.[0]?.itemSectionRenderer?.contents ?? [];
+    const videos = contents
+      .filter((c) => c.videoRenderer)
+      .slice(0, 5)
+      .map((c) => ({
+        url: `https://www.youtube.com/watch?v=${c.videoRenderer.videoId}`,
+        title: c.videoRenderer.title?.runs?.[0]?.text ?? '',
+      }));
+    return { channelUrl: null, videos, subscriberCount: null };
+  } catch {
+    return { channelUrl: null, videos: [], subscriberCount: null };
+  }
+}
+
+async function readAllVendors(vendorsDir) {
+  const files = (await readdir(vendorsDir)).filter((f) => f.endsWith('.md') && f !== '.gitkeep');
+  return Promise.all(
+    files.map(async (f) => {
+      const raw = await readFile(join(vendorsDir, f), 'utf8');
+      const { data } = matter(raw);
+      return data;
+    })
+  );
+}
+
+const config = getYoutubeConfig();
+const vendors = await readAllVendors(opts.vendors);
+
+console.log(`\nYouTube Enrichment — ${vendors.length} vendors`);
+if (!config.apiKey) console.log('  (No YOUTUBE_API_KEY — using web scrape fallback)');
 
 const results = {};
 
-for (let i = 0; i < vendorFiles.length; i++) {
-  const file = vendorFiles[i];
-  const vendor = JSON.parse(readFileSync(join(values.vendors, file), 'utf8'));
-  process.stdout.write(`  [${i + 1}/${vendorFiles.length}] ${vendor.slug}… `);
+for (let i = 0; i < vendors.length; i++) {
+  const vendor = vendors[i];
+  process.stdout.write(`  [${i + 1}/${vendors.length}] ${vendor.id}… `);
 
   try {
-    results[vendor.slug] = await enrichVendor(vendor);
-    const { channel, videos } = results[vendor.slug];
-    console.log(`${channel ? '📺' : '—'} ${videos.length} video(s)`);
+    results[vendor.id] = config.apiKey
+      ? await searchYouTubeApi(vendor.name, vendor.city, config.apiKey)
+      : await searchYouTubeFallback(vendor.name, vendor.city);
+    const { channelUrl, videos } = results[vendor.id];
+    console.log(`${channelUrl ? 'channel' : '—'} ${videos.length} video(s)`);
   } catch (err) {
     console.log(`error: ${err.message}`);
-    results[vendor.slug] = { channel: null, videos: [], subscriberCount: null };
+    results[vendor.id] = { channelUrl: null, videos: [], subscriberCount: null };
   }
 
-  if (i < vendorFiles.length - 1) await delay(1500);
+  if (i < vendors.length - 1) await delay(1000);
 }
 
-mkdirSync(dirname(values.output), { recursive: true });
-writeFileSync(values.output, JSON.stringify(results, null, 2) + '\n', 'utf8');
-console.log(`\nSaved → ${values.output}`);
+console.log(`\nEnriched ${Object.keys(results).length}/${vendors.length} vendors`);
+
+if (opts.dryRun) {
+  console.log(JSON.stringify(results, null, 2));
+} else {
+  await mkdir(dirname(opts.output), { recursive: true });
+  await writeFile(opts.output, JSON.stringify(results, null, 2) + '\n', 'utf8');
+  console.log(`Saved → ${opts.output}`);
+}

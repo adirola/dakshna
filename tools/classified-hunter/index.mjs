@@ -1,101 +1,73 @@
 #!/usr/bin/env node
-/**
- * Classified Hunter CLI
- *
- * Usage:
- *   node tools/classified-hunter/index.mjs --source justdial --city bangalore --category venue --limit 50
- *   node tools/classified-hunter/index.mjs --source all --city mumbai --category photographer
- *
- * Options:
- *   --source     justdial | sulekha | indiamart | google | all  (default: all)
- *   --city       City name (required)
- *   --category   venue | photographer | makeup | caterer | decorator | dj | pandit | planner (required)
- *   --limit      Max results per source (default: 20)
- *   --output-dir Path to src/content/vendors/ (default: ./src/content/vendors)
- *   --batch-dir  Path for batch JSON output (default: ./data/hunts)
- *   --no-write   Skip writing individual vendor files (only saves batch JSON)
- */
-
-import { parseArgs } from 'node:util';
+import { Command } from 'commander';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { CATEGORIES } from '../shared/schema.mjs';
-import { deduplicate } from './lib/normalizer.mjs';
-import { saveResults, printSummary } from './lib/output.mjs';
+import { normalizeVendor, deduplicateVendors } from './lib/normalizer.mjs';
+import { writeJson, writeMarkdownFiles } from './lib/output.mjs';
+import { getScraperConfig } from '../shared/config.mjs';
 
 const __dir = fileURLToPath(new URL('.', import.meta.url));
 const repoRoot = resolve(__dir, '../../');
 
-const { values } = parseArgs({
-  options: {
-    source:     { type: 'string', default: 'all' },
-    city:       { type: 'string' },
-    category:   { type: 'string' },
-    limit:      { type: 'string', default: '20' },
-    'output-dir': { type: 'string', default: join(repoRoot, 'src/content/vendors') },
-    'batch-dir':  { type: 'string', default: join(repoRoot, 'data/hunts') },
-    'no-write': { type: 'boolean', default: false },
-  },
-  strict: false,
-});
+const program = new Command();
 
-const { city, category } = values;
+program
+  .requiredOption('--source <source>', 'google-maps | justdial | sulekha | indiamart')
+  .requiredOption('--city <city>', 'City name to search')
+  .requiredOption('--category <category>', `Vendor category (${CATEGORIES.join(', ')})`)
+  .option('--limit <n>', 'Max results to fetch', '50')
+  .option('--output-dir <path>', 'Directory for raw JSON output', 'data/vendors-raw/')
+  .option('--write-md', 'Also write .md files to src/content/vendors/', false)
+  .option('--dry-run', 'Log only, no file writes', false)
+  .parse(process.argv);
 
-if (!city || !category) {
-  console.error('Usage: node tools/classified-hunter/index.mjs --city <city> --category <category> [options]');
+const opts = program.opts();
+
+if (!CATEGORIES.includes(opts.category)) {
+  console.error(`Invalid category "${opts.category}". Must be one of: ${CATEGORIES.join(', ')}`);
   process.exit(1);
 }
-
-if (!CATEGORIES.includes(category)) {
-  console.error(`Invalid category "${category}". Must be one of: ${CATEGORIES.join(', ')}`);
-  process.exit(1);
-}
-
-const limit = parseInt(values.limit, 10) || 20;
-const outputDir = values['output-dir'];
-const batchDir = values['batch-dir'];
-const writeIndividual = !values['no-write'];
 
 const SOURCES = {
-  justdial: () => import('./sources/justdial.mjs').then((m) => m.scrapeJustDial({ city, category, limit })),
-  sulekha: () => import('./sources/sulekha.mjs').then((m) => m.scrapeSulekha({ city, category, limit })),
-  indiamart: () => import('./sources/indiamart.mjs').then((m) => m.scrapeIndiamart({ city, category, limit })),
-  google: () => import('./sources/google-maps.mjs').then((m) => m.scrapeGoogleMaps({ city, category, limit })),
+  'google-maps': './sources/google-maps.mjs',
+  justdial: './sources/justdial.mjs',
+  sulekha: './sources/sulekha.mjs',
+  indiamart: './sources/indiamart.mjs',
 };
 
-const selectedSources = values.source === 'all' ? Object.keys(SOURCES) : [values.source];
-
-const unknownSources = selectedSources.filter((s) => !SOURCES[s]);
-if (unknownSources.length) {
-  console.error(`Unknown source(s): ${unknownSources.join(', ')}. Valid: ${Object.keys(SOURCES).join(', ')}, all`);
+if (!SOURCES[opts.source]) {
+  console.error(`Unknown source "${opts.source}". Must be one of: ${Object.keys(SOURCES).join(', ')}`);
   process.exit(1);
 }
 
-console.log(`\nClassified Hunter`);
-console.log(`  city:     ${city}`);
-console.log(`  category: ${category}`);
-console.log(`  sources:  ${selectedSources.join(', ')}`);
-console.log(`  limit:    ${limit} per source`);
+const limit = parseInt(opts.limit, 10) || 50;
+const config = getScraperConfig();
 
-const allVendors = [];
+const sourceModule = await import(SOURCES[opts.source]);
+const raw = await sourceModule.scrape({ city: opts.city, category: opts.category, limit, config });
 
-for (const source of selectedSources) {
-  console.log(`\n[${source}] Scraping...`);
-  try {
-    const results = await SOURCES[source]();
-    printSummary(results, source);
-    allVendors.push(...results);
-  } catch (err) {
-    console.error(`[${source}] Error: ${err.message}`);
-  }
+const normalized = raw.map((r) => normalizeVendor(r, opts.source)).filter(Boolean);
+const vendors = deduplicateVendors(normalized);
+
+const date = new Date().toISOString().slice(0, 10);
+const outputPath = join(opts.outputDir, `${opts.source}-${opts.city.toLowerCase()}-${opts.category}-${date}.json`);
+
+console.log(`\nScraped ${raw.length}, normalized ${normalized.length}, deduplicated to ${vendors.length}`);
+
+if (opts.dryRun) {
+  console.log('[dry-run] Would write:');
+  console.log(`  JSON → ${outputPath}`);
+  if (opts.writeMd) console.log(`  .md files → src/content/vendors/`);
+  vendors.slice(0, 5).forEach((v) => console.log(`  ${v.id} (${v.category}, ${v.city})`));
+  process.exit(0);
 }
 
-const deduped = deduplicate(allVendors);
-console.log(`\nTotal unique vendors: ${deduped.length} (from ${allVendors.length} raw results)`);
+await writeJson(vendors, outputPath);
+console.log(`JSON written → ${outputPath}`);
 
-const datestamp = new Date().toISOString().slice(0, 10);
-const batchFile = join(batchDir, `hunt-${datestamp}-${category}-${city.toLowerCase()}.json`);
-
-saveResults(deduped, { outputDir, batchFile, writeIndividual });
-
-console.log('\nDone.');
+if (opts.writeMd) {
+  const mdDir = join(repoRoot, 'src/content/vendors');
+  const { written, skipped } = await writeMarkdownFiles(vendors, mdDir);
+  console.log(`.md files: ${written} written, ${skipped} skipped`);
+}

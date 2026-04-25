@@ -1,15 +1,17 @@
 ---
-import type { Vendor } from '../content.config';
+import type { CollectionEntry } from 'astro:content';
 import { CATEGORY_LABELS, PRICING_LABELS } from '../lib/vendors';
 
+type VendorData = CollectionEntry<'vendors'>['data'];
+
 interface Props {
-  vendor: Vendor;
+  vendor: VendorData;
   variant?: 'default' | 'compact';
 }
 
 const { vendor, variant = 'default' } = Astro.props;
 
-const pricingColors: Record<Vendor['pricingRange'], string> = {
+const pricingColors: Record<string, string> = {
   budget: 'bg-neutral-100 text-neutral-600',
   mid: 'bg-accent-50 text-accent-600',
   premium: 'bg-primary-50 text-primary-600',
@@ -47,9 +49,8 @@ const pricingColors: Record<Vendor['pricingRange'], string> = {
 
     <!-- Name + verified -->
     <h3 class="font-display font-semibold text-neutral-900 text-base leading-tight mb-1">
-      <!-- Stretched link — the pseudo-element covers the whole card -->
       <a
-        href={`/vendors/${vendor.slug}`}
+        href={`/vendors/${vendor.id}`}
         class="after:absolute after:inset-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 rounded-lg"
       >
         {vendor.name}
@@ -73,8 +74,8 @@ const pricingColors: Record<Vendor['pricingRange'], string> = {
 
     <!-- Pricing badge -->
     <div class="flex items-center justify-between mt-auto pt-1">
-      <span class:list={["inline-block px-2 py-0.5 rounded-full text-xs font-medium", pricingColors[vendor.pricingRange]]}>
-        {PRICING_LABELS[vendor.pricingRange]}
+      <span class:list={["inline-block px-2 py-0.5 rounded-full text-xs font-medium", pricingColors[vendor.pricing_range]]}>
+        {PRICING_LABELS[vendor.pricing_range]}
       </span>
     </div>
   </div>

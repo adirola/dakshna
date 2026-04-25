@@ -4,7 +4,7 @@
  */
 
 import { fetchWithRetry, delay, isAllowedByRobots } from '../lib/anti-bot.mjs';
-import { normalizeVendor, deduplicate } from '../lib/normalizer.mjs';
+import { normalizeVendor, deduplicateVendors } from '../lib/normalizer.mjs';
 
 const BASE = 'https://www.justdial.com';
 
@@ -52,7 +52,7 @@ export async function scrapeJustDial({ city, category, limit = 20 }) {
   const vendors = parseListings(html, city, category);
   await delay();
 
-  return deduplicate(vendors.slice(0, limit));
+  return deduplicateVendors(vendors.slice(0, limit));
 }
 
 /**
@@ -112,3 +112,5 @@ function decodeHtml(str) {
     .replace(/&nbsp;/g, ' ')
     .trim();
 }
+
+export { scrapeJustDial as scrape };

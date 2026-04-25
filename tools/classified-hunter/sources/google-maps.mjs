@@ -4,7 +4,7 @@
  */
 
 import { requireConfig, config } from '../../shared/config.mjs';
-import { normalizeVendor, deduplicate } from '../lib/normalizer.mjs';
+import { normalizeVendor, deduplicateVendors } from '../lib/normalizer.mjs';
 import { delay } from '../lib/anti-bot.mjs';
 
 const PLACES_API = 'https://maps.googleapis.com/maps/api/place';
@@ -59,5 +59,7 @@ export async function scrapeGoogleMaps({ city, category, limit = 20 }) {
     if (pageToken) await delay(2500); // Google requires a short wait before using page token
   } while (pageToken && results.length < limit);
 
-  return deduplicate(results.slice(0, limit));
+  return deduplicateVendors(results.slice(0, limit));
 }
+
+export { scrapeGoogleMaps as scrape };

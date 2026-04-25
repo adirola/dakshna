@@ -37,7 +37,7 @@ const meta = CATEGORIES[category] ?? {
 const cities = [...new Set(vendors.map((v) => v.data.city))].sort();
 
 const PRICING_ORDER = ['budget', 'mid', 'premium', 'luxury'];
-const pricingRanges = [...new Set(vendors.map((v) => v.data.pricingRange))].sort(
+const pricingRanges = [...new Set(vendors.map((v) => v.data.pricing_range))].sort(
   (a, b) => PRICING_ORDER.indexOf(a) - PRICING_ORDER.indexOf(b)
 );
 
@@ -135,7 +135,7 @@ const PAGE_SIZE = 12;
               <div
                 class="vendor-card-wrapper"
                 data-city={entry.data.city.toLowerCase()}
-                data-pricing={entry.data.pricingRange}
+                data-pricing={entry.data.pricing_range}
               >
                 <VendorCard vendor={entry.data} />
               </div>
