@@ -97,7 +97,7 @@ function isDisallowed(robotsTxt, path) {
   for (const line of lines) {
     if (line.startsWith('User-agent:')) {
       const ua = line.slice('User-agent:'.length).trim();
-      inRelevantBlock = ua === '*' || /googlebot|bingbot/i.test(ua) === false;
+      inRelevantBlock = ua === '*';
     }
     if (inRelevantBlock && line.startsWith('Disallow:')) {
       const disallowed = line.slice('Disallow:'.length).trim();

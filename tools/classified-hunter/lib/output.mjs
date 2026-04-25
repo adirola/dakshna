@@ -3,23 +3,6 @@ import { join } from 'node:path';
 import { writeVendorMarkdown } from '../../shared/markdown-writer.mjs';
 
 /**
- * Deduplicate vendors by id (slug). Keeps first occurrence.
- * @param {object[]} vendors
- * @returns {object[]}
- */
-export function deduplicateVendors(vendors) {
-  const seen = new Set();
-  let dupes = 0;
-  const result = vendors.filter((v) => {
-    if (seen.has(v.id)) { dupes++; return false; }
-    seen.add(v.id);
-    return true;
-  });
-  if (dupes > 0) process.stderr.write(`  [dedup] removed ${dupes} duplicate(s)\n`);
-  return result;
-}
-
-/**
  * Write vendors to a JSON file.
  * @param {object[]} vendors
  * @param {string} outputPath
