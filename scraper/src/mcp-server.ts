@@ -108,7 +108,7 @@ server.registerPrompt(
   {
     description: 'Orchestrate the full vendor scraping pipeline: search → scrape → synthesize. Sequences gemini_web_search, firecrawl_scrape, and synthesize_vendor in order.',
     argsSchema: {
-      category: z.string().describe('Vendor category (venue, photographer, makeup, caterer, decorator, dj, pandit, planner)'),
+      category: z.string().describe('Vendor category (venue, photographer, makeup, decorator, caterer, mehendi, dj, choreographer, planner, jewelry, tailor, entertainment, pandit, other)'),
       city: z.string().describe('Target city for vendor discovery'),
       limit: z.string().optional().describe('Max number of directory URLs to scrape (default: 3)'),
     },
