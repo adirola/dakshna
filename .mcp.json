@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "dakshna-scraper": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["--experimental-strip-types", "scraper/src/mcp-server.ts"],
+      "env": {
+        "GEMINI_API_KEY": "${GEMINI_API_KEY}",
+        "FIRECRAWL_API_KEY": "${FIRECRAWL_API_KEY}"
+      }
+    }
+  }
+}

@@ -103,6 +103,65 @@ server.registerTool(
   }
 );
 
+server.registerPrompt(
+  'scraper_workflow',
+  {
+    description: 'Orchestrate the full vendor scraping pipeline: search → scrape → synthesize. Sequences gemini_web_search, firecrawl_scrape, and synthesize_vendor in order.',
+    argsSchema: {
+      category: z.string().describe('Vendor category (venue, photographer, makeup, caterer, decorator, dj, pandit, planner)'),
+      city: z.string().describe('Target city for vendor discovery'),
+      limit: z.string().optional().describe('Max number of directory URLs to scrape (default: 3)'),
+    },
+  },
+  ({ category, city, limit }) => {
+    const maxUrls = parseInt(limit ?? '3', 10);
+    const query = `${category} vendor listings ${city} wedding directory site:wedmegood.com OR site:weddingbazaar.com OR site:shaadisaga.com`;
+
+    return {
+      messages: [
+        {
+          role: 'user' as const,
+          content: {
+            type: 'text' as const,
+            text: `You are a vendor data agent for Dakshna, a South Asian wedding vendor directory.
+
+Your goal: discover and save ${category} vendors in ${city} as validated Markdown files.
+
+Follow this exact sequence — do not skip or reorder steps:
+
+## Step 1 — Search
+Call \`gemini_web_search\` with this query:
+\`\`\`
+${query}
+\`\`\`
+Collect up to ${maxUrls} directory listing URLs from the results.
+
+## Step 2 — Scrape each URL
+For each URL from Step 1 (up to ${maxUrls}):
+- Call \`firecrawl_scrape\` with that URL
+- Store the returned markdown
+
+## Step 3 — Synthesize vendors
+For each scraped markdown from Step 2:
+- Call \`synthesize_vendor\` with:
+  - \`markdown\`: the scraped content
+  - \`sourceUrl\`: the scraped URL
+  - \`category\`: "${category}"
+  - \`city\`: "${city}"
+- The tool writes .md files to src/content/vendors/ automatically
+
+## Done
+After all URLs are processed, report:
+- Total vendor files written
+- Any URLs that failed and why
+- A brief summary of vendors discovered`,
+          },
+        },
+      ],
+    };
+  }
+);
+
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
