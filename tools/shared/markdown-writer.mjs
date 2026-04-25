@@ -18,14 +18,16 @@ export function generateFrontmatter(vendor) {
       ? '\n' + arr.map((v) => `  - ${v}`).join('\n')
       : ' []';
 
+  const q = (v) => JSON.stringify(String(v));
+
   return [
     '---',
-    `id: ${vendor.id}`,
-    `name: ${vendor.name}`,
-    `url: ${vendor.url}`,
-    `description: ${vendor.description}`,
+    `id: ${q(vendor.id)}`,
+    `name: ${q(vendor.name)}`,
+    `url: ${q(vendor.url)}`,
+    `description: ${q(vendor.description)}`,
     `category: ${vendor.category}`,
-    `city: ${vendor.city}`,
+    `city: ${q(vendor.city)}`,
     `region: ${vendor.region}`,
     `intents:${yamlArray(vendor.intents ?? [])}`,
     `related:${yamlArray(vendor.related ?? [])}`,

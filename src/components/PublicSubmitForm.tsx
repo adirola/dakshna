@@ -28,7 +28,7 @@ function validate(data: FormData): string[] {
   if (!data.url.trim()) errors.push('Website URL is required');
   else if (!/^https?:\/\//i.test(data.url)) errors.push('URL must start with http:// or https://');
   if (!data.description.trim()) errors.push('Description is required');
-  else if (data.description.length > 500) errors.push('Description must be 500 characters or fewer');
+  else if (data.description.length > 200) errors.push('Description must be 200 characters or fewer');
   if (!data.category) errors.push('Category is required');
   if (!data.city.trim()) errors.push('City is required');
   if (!data.pricing_range) errors.push('Pricing range is required');
@@ -129,7 +129,7 @@ export default function PublicSubmitForm() {
 
       <div>
         <label className="block text-sm font-medium text-neutral-700 mb-1">
-          Short description * <span className="text-neutral-400 font-normal">({form.description.length}/500)</span>
+          Short description * <span className="text-neutral-400 font-normal">({form.description.length}/200)</span>
         </label>
         <textarea name="description" value={form.description} onChange={handleChange} rows={3}
           disabled={state === 'submitting'}
